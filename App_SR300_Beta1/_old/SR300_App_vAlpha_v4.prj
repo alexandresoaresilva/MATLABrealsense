@@ -1,0 +1,99 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration file="C:\Users\alex\OneDrive\Research Sarraf\Matlac_C v4\SR300_App_vAlpha_v4.prj" location="C:\Users\alex\OneDrive\Research Sarraf\Matlac_C v4" name="SR300_App_vAlpha_v4" target="target.mlapps" target-name="Package App">
+    <param.appname>SR300_App_vAlpha_v4</param.appname>
+    <param.authnamewatermark />
+    <param.email />
+    <param.company />
+    <param.icon />
+    <param.icons />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.version>1.0</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms>
+      <item>win64</item>
+    </param.platforms>
+    <param.output>C:\Users\alex\OneDrive\Research Sarraf\Matlac_C v4</param.output>
+    <param.guid>1e78bd2f-5667-4cb1-99cf-c11748d75bd9</param.guid>
+    <unset>
+      <param.authnamewatermark />
+      <param.email />
+      <param.company />
+      <param.icon />
+      <param.icons />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.version />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\SR300_App_vAlpha_v4.mlapp</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\allcam.m</file>
+      <file>${PROJECT_ROOT}\color.m</file>
+      <file>${PROJECT_ROOT}\CreatePointCloudMex.m</file>
+      <file>${PROJECT_ROOT}\depth.m</file>
+      <file>${PROJECT_ROOT}\optionstable.mat</file>
+      <file>${PROJECT_ROOT}\pcl.m</file>
+      <file>${PROJECT_ROOT}\realsense.m</file>
+      <file>${PROJECT_ROOT}\rs_check_error.m</file>
+      <file>${PROJECT_ROOT}\rs_deproject_pixel_to_point_Mex.mexw64</file>
+      <file>${PROJECT_ROOT}\rs_error.m</file>
+      <file>${PROJECT_ROOT}\rs_project_point_to_pixel_Mex.mexw64</file>
+      <file>${PROJECT_ROOT}\rs_transform_point_to_point_Mex.mexw64</file>
+      <file>${PROJECT_ROOT}\writeDescWithParagraphs.m</file>
+    </fileset.depfun>
+    <fileset.resources />
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\alex\OneDrive\Research Sarraf" name="Matlac_C v4" optional="false">C:\Users\alex\OneDrive\Research Sarraf\Matlac_C v4</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2017a</root>
+      <toolboxes>
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+      </toolboxes>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>6.2</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

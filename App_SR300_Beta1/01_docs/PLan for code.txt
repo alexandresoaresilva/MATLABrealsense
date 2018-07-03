@@ -1,0 +1,133 @@
+i - no of cameras
+app.deviceCount
+
+
+selectdev
+
+            % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [1 213 1025 556];
+
+% Create Panel
+            app.PanelMinMaxSelect = uipanel(app.tabSelection);
+            app.PanelMinMaxSelect.Position = [114 121 181 98];
+
+
+%>>>>>>> createDescription >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        function createDescription(app)
+            app.descriptionTextArea = uitextarea(app.PanelMinMaxSelect);
+            app.descriptionTextArea.Editable = 'off';
+            app.descriptionTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.descriptionTextArea.Position = [331.6875 257 228.015625 60];
+            app.descriptionTextArea.FontWeight = 'bold';
+            app.descriptionTextArea.Value = app.optionTable(app.index,3);
+            %creates description label
+            descrptPos = app.descriptionTextArea.Position;
+            app.descriptionTextAreaLabel = uilabel(app.PanelMinMaxSelect);
+            app.descriptionTextAreaLabel.Position = [(5+descrptPos(1)) (48+descrptPos(2)) 80 30];
+            app.descriptionTextAreaLabel.HorizontalAlignment = 'right';
+            %app.descriptionTextAreaLabel.FontWeight = 'bold';
+            app.descriptionTextAreaLabel.Text = 'description';
+        end
+%>>>>> END of createDescription
+
+
+%>>>>>>>>> showMinMaxBoxes >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        function buildMinMaxBoxes(app)
+            % Create SliderMinMaxText
+            app.SliderMinMaxText = uilabel(app.tabSelection);
+            app.SliderMinMaxText.Position = [330 480 28 42];
+            app.SliderMinMaxText.Text = {'max'; ''; 'min'};
+            
+            % Create SliderMaxValue - box at the slider's left-hand side
+            app.SliderMaxValue = uilabel(app.tabSelection);
+            app.SliderMaxValue.BackgroundColor = [0.8588 0.9451 0.9882];
+            app.SliderMaxValue.HorizontalAlignment = 'right';
+            app.SliderMaxValue.FontWeight = 'bold';
+            app.SliderMaxValue.Position = [365 507 42 15];
+            app.SliderMaxValue.Text = num2str(app.minMaxDefaultStepValues(2));
+
+            % Create SliderMinValue - box at the slider's left-hand side             
+            app.SliderMinValue = uilabel(app.tabSelection);
+            app.SliderMinValue.BackgroundColor = [0.8588 0.9451 0.9882];
+            app.SliderMinValue.HorizontalAlignment = 'right';
+            app.SliderMinValue.FontWeight = 'bold';
+            app.SliderMinValue.Position = [365 478 42 15];
+            app.SliderMinValue.Text = num2str(app.minMaxDefaultStepValues(1));
+            %app.SliderMinValue.Text = num2str(minMax(1))
+
+        end
+
+%>>>>END of showMinMaxBoxes
+
+
+% Create Panel_2
+            app.Panel_2 = uipanel(app.UIFigure);
+            app.Panel_2.Position = [114 121 181 98];
+
+
+%>>>>>>>>> buildDefaultValueButton&Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        function buildDefaultValueBox(app)
+            % Create defaultValueBoxLabel
+            app.defaultValueBoxLabel = uilabel(app.tabSelection);
+            app.defaultValueBoxLabel.Position = [430 480 50 42];
+            app.defaultValueBoxLabel.FontWeight = 'normal';
+            app.defaultValueBoxLabel.HorizontalAlignment = 'center';
+            app.defaultValueBoxLabel.Text = {'default'};
+            
+            % Create defaultValueBox - box at the slider's left-hand side
+            app.defaultValueBox = uilabel(app.tabSelection);
+            app.defaultValueBox.BackgroundColor = [0.8588 0.9451 0.9882];
+            app.defaultValueBox.HorizontalAlignment = 'right';
+            app.defaultValueBox.FontWeight = 'bold';
+            app.defaultValueBox.Position = [500 507 42 15];
+            app.defaultValueBox.Text = num2str(app.minMaxDefaultStepValues(3));
+        end
+
+1. create listBox automatically from size of optionList
+
+
+app.tabSize = app.SR300Tab.Position(3:4); %gets tab size to calculate proportions for slider
+
+app.tabSelection = app.SR300Tab; % tab object is to be used as container - select it using the connected camera
+
+
+
+SR300Tab                     matlab.ui.container.Tab
+
+Replace tab :
+       % Create SR300ListBox
+            app.SR300ListBox = uilistbox(app.SR300Tab);
+
+
+            % Create generatepointcloudsButton
+            app.generatepointcloudsButton = uibutton(app.SR300Tab, 'push');
+
+
+            % Create colorstreamButton
+            app.colorstreamButton = uibutton(app.SR300Tab, 'push');
+
+
+            % Create depthstreamButton
+            app.depthstreamButton = uibutton(app.SR300Tab, 'push');
+
+            % Create setselectiontodefaultButton
+            app.setselectiontodefaultButton = uibutton(app.SR300Tab, 'push');
+
+            % Create setallparameterstodefaultvaluesButton
+            app.setallparameterstodefaultvaluesButton = uibutton(app.SR300Tab, 'push');
+
+            % Create STOPstreamButton
+            app.STOPstreamButton = uibutton(app.SR300Tab, 'state');
+
+   % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [18 241 467 225];
+
+            % Create Tab
+            app.Tab = uitab(app.TabGroup);
+            app.Tab.Title = 'Tab';
+
+            % Create Tab2
+            app.Tab2 = uitab(app.TabGroup);
+            app.Tab2.Title = 'Tab2';
