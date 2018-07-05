@@ -8,7 +8,9 @@ CHECKER_MIN_DIM = [237.00 301.00]; %[height width]
 CHECKER_MIN_AREA = CHECKER_MIN_DIM(1) * CHECKER_MIN_DIM(2);
 CHECKER_MAX_AREA = (CHECKER_MIN_DIM(1)+30)*(CHECKER_MIN_DIM(2)+30)*1.3;
 
-addpath('Sarraf_Ben_detect\img_checkers');
+addpath('Sarraf_detect\checker_imgs');
+addpath('Sarraf_detect\checker_imgs\fails_to_detect_any_patches');
+I = imread('dist_checker_rotated.png');
 color_sqr_max_area = (CHECKER_MIN_DIM(1)/4 * CHECKER_MIN_DIM(2)/6)*1.4;
 COLOR_SQR_MIN_AREA = 40*40;
 ref_positions =   [184, 162;...
@@ -16,11 +18,6 @@ ref_positions =   [184, 162;...
                     430, 162;...
                     430, 310];
 
-%I = imread('dist_checker_rotated.png');
-% I = imread('checker_lab.png');
-%I = imread('checker_iphone.png');
-%I = imread('checker_lab.png');
-I = imread('dist_checker_rotated.png');
 %resize to 640x480
 
 I = imresize(I,[480 640]);
@@ -211,7 +208,6 @@ for i=1:length(new_props)
     end
 end
 
-
 isoutlier(boundingBoxes)
 figure
 imshow(newI);
@@ -257,7 +253,7 @@ gauss2 = imgaussfilt(I,sigma2);
 dogImg = gauss1 - gauss2;
 figure
 dogImg = dogImg*10;
-imshow(dogImg);
+imshow(rgb2gray(dogImg));
 I_bw_gauss = im2bw(dogImg);
 hold on
 gauss_props = regionprops(I_bw_gauss,'Area','Centroid',...

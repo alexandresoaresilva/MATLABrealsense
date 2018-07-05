@@ -1,8 +1,12 @@
 clear, clc, close all;
 %[ bluishgreen ; black ; brown; white ] [x, y;
 %%  CONSTANTS
-I = imread('dist_checker.png');
+addpath('Sarraf_detect\checker_imgs');
+addpath('Sarraf_detect\checker_imgs\fails_to_detect_any_patches');
+
+I = imread('dist_checker_rotated.png');
 I = imresize(I,[480 640]);
+
 
 %height : bluish green-black
 % widht : bluish green-brown
@@ -57,7 +61,7 @@ gauss_props = regionprops(I_bw_gauss ,'Area','Centroid',...
      'BoundingBox');
 [BB_gauss, BB_gauss_indeces, amount_detected_GAUSS] =...
     select_real_patches_from_BB(gauss_props, 40*40,...
-    10000, [0.6 1.4])
+    10000, [0.8 1.2])
 
 for i=1:length(BB_gauss(:,1))
     j = mod(i,7)+1;
