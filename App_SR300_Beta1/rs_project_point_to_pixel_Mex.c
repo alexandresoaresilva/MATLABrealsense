@@ -22,7 +22,9 @@ const static struct {
 
 rs_distortion str2enum(const char *str)
 {
-	int j;
+	//int j;
+    mwSize j;
+    //mwSize
 	for (j = 0; j < sizeof(conversion) / sizeof(conversion[0]); ++j)
 		if (!strcmp(str, conversion[j].str))
 			return conversion[j].val;
