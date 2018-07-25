@@ -246,7 +246,7 @@ function [checker_found, error] = ColorPatchDetectClean(img_char)
         locations = round(patches_posProps.Centroid);
         
         %rgb1(locations(2,2),locations(2,1),:);
-        white = findColors(rgb1, locations, patches_posProps.PixelList);
+        cornersFound = findCorners(rgb1, locations, patches_posProps.PixelList);
         
         figure
         imshow((0.8*rgb1+0.2*mask),[]);
@@ -256,10 +256,10 @@ function [checker_found, error] = ColorPatchDetectClean(img_char)
         %black
         % scatter(bluGreen_wh(1,1),bluGreen_wh(1,2),'xw');
         %white
-        if white == [0 0]
+        if cornersFound(4,:) == [0 0]
             xlabel('No white patch found. Plase try again')
         else
-            scatter(white(1,1),white(1,2),'xb');
+            scatter(cornersFound(4,1),cornersFound(4,2),'xb');
         end
         checker_found = 1;
         pause
@@ -270,7 +270,12 @@ end
 %reorganizes locations to follow this pattern
 % brown to bluish green
 % 
-function white = findColors(img, locations, pixelList)
+function cornersFound = findCorners(img, locations, pixelList)
+    %corners are
+    %x(1), y(1) bluish green
+    %x(2), y(2) black
+    %x(3), y(3) brown
+    %x(4), y(4) white
     
     img = img*1.01;
     b = convhull(locations(:,1),locations(:,2));
@@ -333,42 +338,11 @@ function white = findColors(img, locations, pixelList)
     corners = [ corners; 
                 convHul(i_MaxFinal_2,1),convHul(i_MaxFinal_2,2);...
                 convHul(i_MaxFinal_22,1),convHul(i_MaxFinal_22,2)];
-	%distance = zeros(4,1);
-    % close_corners = zeros(2,2,2);
-    % far_corners = zeros(2,2,2);
-    % for i=1:2
-    %     %i+2 because i+1 is known to be on the opposite diagonal corner
-    % if i==1
-    %     if i ==1
-    %         distance1 = vecnorm(corners(i+3,:) - corners(i,:),2,2);
-    %     else
-    %         distance1 = vecnorm(corners(i+1,:) - corners(i,:),2,2);
-    %     end
-    %         distance2 = vecnorm(corners(i+2,:) - corners(i,:),2,2);
-
-      
-    %     % far_corners: oppositve horizontal corners (longest path), 
-    %     %considering the checker a rectangle with shorter vertical  
-    %     % dim and longer horiz dim. 
-    %     % close_corners: vertical obviosly
-    %   if distance1 > distance2
-    %     far_corners(:,:,i) = [corners(i+1,:);
-    %                       corners(i,:)];
-    %     close_corners(:,:,i) = [corners(i+2,:);
-    %                         corners(i,:)];
-    %   else
-    %     far_corners(:,:,i) = [corners(i+2,:);
-    %                           corners(i,:)];
-    %     close_corners(:,:,i) = [corners(i+1,:);
-    %                             corners(i,:)];
-    %   end
-    % end    
-
 
     
-    bluishGreen = zeros(1,2);
+    
     white = zeros(1,2);
-
+    i_white =0;
     avg_white = 0;
     for i=1:length(corners)
         scatter(corners(i,1),corners(i,2),'d','LineWidth',20);
@@ -397,20 +371,60 @@ function white = findColors(img, locations, pixelList)
         [avg_pixel, diff_pix]
         %avgs and differences gathered from experimental values
         %white first (largest values)
-
+        %oneDiff_is_zero = ~(R_minus_B || R_minus_G || G_minus_B);
+        max_diff = max([R_minus_B, R_minus_G, G_minus_B]);
+        min_diff = min([R_minus_B, R_minus_G, G_minus_B]);
+        diff_betwMaxAdnMinDiff = max_diff  - min_diff;
+        % finds white
         if avg_pixel > 125 && diff_pix < 60
             if R_minus_B < 10 || R_minus_G  < 10 ...
-                || G_minus_B  < 10
-                if ~isempty(white) && avg_white > 150
+                || G_minus_B  < 10                
+                if ~isempty(white) && avg_white > 190
                     white = white;
                 else
-                    avg_white = avg_pixel;
-                    white = corners(i,:);
+                    if diff_betwMaxAdnMinDiff < 47
+                        avg_white = avg_pixel;
+                        white = corners(i,:);
+                        i_white = i;
+                    end
+                end
+            end
+            if R > 200 && B > 200 && G > 200
+                if ~isempty(white) && avg_white > 200
+                    white = white;
+                else
+                    if  diff_betwMaxAdnMinDiff < 47
+                        avg_white = avg_pixel;
+                        white = corners(i,:);
+                        i_white = i;
+                    end
                 end
             end
         end
     end
+
+    %% calculate distance from white
+    %distance1 = vecnorm(corners(i+3,:) - corners(i,:),2,2);
+    dist_whiteFromOthers = zeros(4,1);
+    for i=1:4
+        dist_whiteFromOthers(i) = vecnorm(corners(i_white,:) - corners(i,:),2,2);
+    end
     
+    
+    [~,indexDistMax] = max(dist_whiteFromOthers);
+    bluishGreen = corners(indexDistMax,:);
+    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+    
+    [~,indexDistMax] = max(dist_whiteFromOthers);
+    black = corners(indexDistMax,:);
+    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+
+    [~,indexDistMax] = max(dist_whiteFromOthers);
+    brown = corners(indexDistMax,:);
+    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+   
+
+       
     
     theta = atan2(bluishGreen(2)-white(2),bluishGreen(1)-white(1));
     if theta  <0 
@@ -418,13 +432,15 @@ function white = findColors(img, locations, pixelList)
     end
     
 	rot_M =[cos(theta) sin(theta); -sin(theta) cos(theta)];
-    %a = plot(locations(k,1), locations(k,2));
-%     for i=1:length(convHul)
-%         scatter(convHul(i,1),convHul(i,2),'dm','LineWidth',20);
-%     end
     
     theta = rad2deg(theta)    
+    cornersFound = [bluishGreen;
+                    black;
+                    brown;
+                    white];
 end
+
+function twentyFour_by_Three_Matrix = findAllColors(cornersFound)
 %     %% TRANSFORMATION (shear + rotation + scaling )
 %     %x(1), y(1) bluish green
 %     %x(2), y(2) black
@@ -473,6 +489,4 @@ end
 %         colorPos = [                colorPos; 
 %                     round(color_pos(end:-1:1,2:-1:1,i))];
 %     end
-%     
-% 
-% end
+end

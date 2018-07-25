@@ -42,10 +42,6 @@ function  [colorPos, color_pos] = selectCheckerPatches(I)
     hold on
 
     %% TRANSFORMATION (shear + rotation + scaling )
-    %x(1), y(1) bluish green
-    %x(2), y(2) black
-    %x(3), y(3) brown
-    %x(4), y(4) white
     found_positions =  [x(1), y(1);
                         x(2), y(2);
                         x(3), y(3);
