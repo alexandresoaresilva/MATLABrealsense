@@ -22,9 +22,7 @@ function [file_names2, file_names2_char] = save_file_names_in_folder(img_folder,
     end
 
     file_names = struct2cell(dir(extension));
-
     file_names2 = string.empty(0, length(file_names(1,:)) );
-    %b = file_names{1,3}(1,:)
 
     for i=1:size(file_names,2)%no. of columns
         %file_name_dummy = cell2mat(file_names(1,i));
@@ -36,7 +34,6 @@ function [file_names2, file_names2_char] = save_file_names_in_folder(img_folder,
             file_names2 = [file_names2; file_name_dummy];
         end
     end
-
     file_names2_char = char(file_names2);
     cd(current_folder);
 end

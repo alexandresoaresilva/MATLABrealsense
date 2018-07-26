@@ -1,12 +1,12 @@
 % Author: Dr. Hamed Sari-Sarraf
 % input:
 % outputs: 
-function [checker_found, error] = ColorPatchDetectClean(img_char)
+function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
     addpath(pwd);
     
     error = MException.empty();
     checker_found = 0;
-    
+    colorPos = 0;
     close all
     try
         % cam = webcam(2);
@@ -69,7 +69,7 @@ function [checker_found, error] = ColorPatchDetectClean(img_char)
         T3=[1 0 0; 0 1 0; -5 -5 1];
         %sets of parallel lines remain parallet after affine transform
         tform = affine2d(T3);
-        % Nearest-neighbor interpolation—the output pixel is assigned the value 
+        % Nearest-neighbor interpolationï¿½the output pixel is assigned the value 
         % of the pixel that the point falls within. No other pixels are considered.
         BW=imwarp(BW,tform,'nearest','outputview',imref2d(size(BW)));
         BW=imclearborder(BW,8);
@@ -253,19 +253,57 @@ function [checker_found, error] = ColorPatchDetectClean(img_char)
         title(img_char);
         disp(['Pic: ', img_char]);
         hold on
-        %black
-        % scatter(bluGreen_wh(1,1),bluGreen_wh(1,2),'xw');
-        %white
+%     cornersFound = [bluishGreen;
+%                     black;
+%                     brown;
+%                     white];
         if cornersFound(4,:) == [0 0]
             xlabel('No white patch found. Plase try again')
         else
             scatter(cornersFound(4,1),cornersFound(4,2),'xb');
         end
+        % colorPos matches sequence on pdf document
+        % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
+        % color_pos(7:12,:) == orange to orange yellow(2nd row)
+        % color_pos(13:18,:) == blue to cyan(3rd row)
+        % color_pos(19:24,:) == white to black (3rd row)
+        colorPos = zeros(24,3);
+        
+        if cornersFound
+            colorPos = findAllColors(cornersFound)
+            scatter(colorPos(1:6,2), colorPos(1:6,1),'LineWidth',15);
+            % bluish green
+            scatter(colorPos(6,2), colorPos(6,1),'LineWidth',15);
+            %pause
+
+
+            scatter(colorPos(7:12,2), colorPos(7:12,1),'LineWidth',15);
+            % orange yellow
+            scatter(colorPos(12,2), colorPos(12,1),'LineWidth',15);
+            %pause
+
+            scatter(colorPos(13:18,2), colorPos(13:18,1),'LineWidth',15);
+            % cyan
+            scatter(colorPos(18,2), colorPos(18,1),'LineWidth',15);
+            %pause
+
+            scatter(colorPos(19:24,2), colorPos(19:24,1),'LineWidth',15);
+            % black
+            scatter(colorPos(24,2), colorPos(24,1),'LineWidth',15);
+        else
+            disp('failed to detect');
+            return
+        end
+
+        
+        hold off
         checker_found = 1;
+        
         pause
     catch ME
        error =  ME
     end
+        
 end
 %reorganizes locations to follow this pattern
 % brown to bluish green
@@ -297,6 +335,7 @@ function cornersFound = findCorners(img, locations, pixelList)
         % i_MaxFina_l (distance between them is max
         max_norm_colected(i,:) = [i_max, maxNorm];
     end
+
     %% gets largest 2 distances between points
     %   runs twice at each point because there'll be to two distances 
     %   that are the same - from point 1 to point 2 and vice versa
@@ -358,6 +397,7 @@ function cornersFound = findCorners(img, locations, pixelList)
         G = mean(avgPix_G);
         avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
             rect(i).Position(1):rect(i).Position(1)+5,3));
+        
         B = mean(avgPix_B);
 
         R_minus_B = mean(abs(avgPix_R - avgPix_B));
@@ -405,88 +445,91 @@ function cornersFound = findCorners(img, locations, pixelList)
 
     %% calculate distance from white
     %distance1 = vecnorm(corners(i+3,:) - corners(i,:),2,2);
-    dist_whiteFromOthers = zeros(4,1);
-    for i=1:4
-        dist_whiteFromOthers(i) = vecnorm(corners(i_white,:) - corners(i,:),2,2);
-    end
-    
-    
-    [~,indexDistMax] = max(dist_whiteFromOthers);
-    bluishGreen = corners(indexDistMax,:);
-    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
-    
-    [~,indexDistMax] = max(dist_whiteFromOthers);
-    black = corners(indexDistMax,:);
-    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+    if i_white %if white was found
+        dist_whiteFromOthers = zeros(4,1);
+        for i=1:4
+            dist_whiteFromOthers(i) = vecnorm(corners(i_white,:) - corners(i,:),2,2);
+        end
 
-    [~,indexDistMax] = max(dist_whiteFromOthers);
-    brown = corners(indexDistMax,:);
-    dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
-   
 
-       
-    
-    theta = atan2(bluishGreen(2)-white(2),bluishGreen(1)-white(1));
-    if theta  <0 
-        theta = theta  + 2*pi;
+        [~,indexDistMax] = max(dist_whiteFromOthers);
+        bluishGreen = corners(indexDistMax,:);
+        dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+
+        [~,indexDistMax] = max(dist_whiteFromOthers);
+        black = corners(indexDistMax,:);
+        dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+
+        [~,indexDistMax] = max(dist_whiteFromOthers);
+        brown = corners(indexDistMax,:);
+        dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner       
+
+        cornersFound = [bluishGreen;
+                        black;
+                        brown;
+                        white];
+    else
+        cornersFound = 0;
     end
-    
-	rot_M =[cos(theta) sin(theta); -sin(theta) cos(theta)];
-    
-    theta = rad2deg(theta)    
-    cornersFound = [bluishGreen;
-                    black;
-                    brown;
-                    white];
 end
 
-function twentyFour_by_Three_Matrix = findAllColors(cornersFound)
+function colorPos = findAllColors(cornersFound)
 %     %% TRANSFORMATION (shear + rotation + scaling )
 %     %x(1), y(1) bluish green
 %     %x(2), y(2) black
 %     %x(3), y(3) brown
 %     %x(4), y(4) white
-%     found_positions =  [x(1), y(1);
-%                         x(2), y(2);
-%                         x(3), y(3);
-%                         x(4), y(4)];
-% 
-%     %bluish green to black side
-%     step_blgr_to_brwn = ([x(1), y(1)] - [x(3), y(3)])/5;
-%     %black to white
+%     cornersFound = [bluishGreen;
+%                     black;
+%                     brown;
+%                     white];
 
-% 
-%     blgr_to_brw(1,:) = [x(1), y(1)];
-%     bk_to_wh(1,:) = [x(2), y(2)];
-%     for i=2:6 %for sides
-%        %bluish green to brown
-%        blgr_to_brw(i,:) = blgr_to_brw(i-1,:)- step_blgr_to_brwn;
-%        %black to white
-%        bk_to_wh(i,:) = bk_to_wh(i-1,:)- step_bk_to_wh;
-%     end
-%     %step size between the large sides
-%     step_btw_wideSide = (blgr_to_brw - bk_to_wh)/3;
-%     %% matrix that holds positions for all colors
-%     colors = {'ob','xw','xm','og'};
-%     % color_pos(:,:,1) == bluish green to brown ("dark skin") (1st row)
-%     % color_pos(:,:,2) == orange yellow to orange(2nd row)
-%     % color_pos(:,:,3) == cyan to blue(3rd row)
-%     % color_pos(:,:,4) == black 2 to white(3rd row)
-%     color_pos(:,:,1) = blgr_to_brw;
-%     for i=2:4 %for sides
-%        color_pos(:,:,i) = color_pos(:,:,i-1) - step_btw_wideSide;
-%        scatter(color_pos(:,1,i),color_pos(:,2,i),cell2mat(colors(i)))
-%     end
-%     
-%     colorPos = round(color_pos(end:-1:1,2:-1:1,1));
-%     % colorPos matches sequence on pdf document
-%     % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
-%     % color_pos(7:12,:) == orange to orange yellow(2nd row)
-%     % color_pos(13:18,:) == blue to cyan(3rd row)
-%     % color_pos(19:24,:) == white to black (3rd row)
-%     
-%     for i=2:4
-%         colorPos = [                colorPos; 
-%                     round(color_pos(end:-1:1,2:-1:1,i))];
-%     end
+%     x = zeros(4,1);
+%     y = zeros(4,1);
+    x =  cornersFound(:,1);
+    y =  cornersFound(:,2);
+    
+%     [x(1), y(1)] =  cornersFound(1,:);
+%     [x(2), y(2)] =  cornersFound(2,:);
+%     [x(3), y(3)] =  cornersFound(3,:);
+%     [x(4), y(4)] =  cornersFound(4,:);
+
+
+    step_blgr_to_brwn = ([x(1), y(1)] - [x(3), y(3)])/5;
+    %black to white
+    step_bk_to_wh = ([x(2), y(2)] - [x(4), y(4)])/5;
+
+    blgr_to_brw(1,:) = [x(1), y(1)];
+    bk_to_wh(1,:) = [x(2), y(2)];
+    for i=2:6 %for sides
+       %bluish green to brown
+       blgr_to_brw(i,:) = blgr_to_brw(i-1,:)- step_blgr_to_brwn;
+       %black to white
+       bk_to_wh(i,:) = bk_to_wh(i-1,:)- step_bk_to_wh;
+    end
+    %step size between the large sides
+    step_btw_wideSide = (blgr_to_brw - bk_to_wh)/3;
+    %% matrix that holds positions for all colors
+    colors = {'ob','xw','xm','og'};
+    % color_pos(:,:,1) == bluish green to brown ("dark skin") (1st row)
+    % color_pos(:,:,2) == orange yellow to orange(2nd row)
+    % color_pos(:,:,3) == cyan to blue(3rd row)
+    % color_pos(:,:,4) == black 2 to white(3rd row)
+    color_pos(:,:,1) = blgr_to_brw;
+    for i=2:4 %for sides
+       color_pos(:,:,i) = color_pos(:,:,i-1) - step_btw_wideSide;
+       scatter(color_pos(:,1,i),color_pos(:,2,i),cell2mat(colors(i)))
+    end
+    
+    colorPos = round(color_pos(end:-1:1,2:-1:1,1));
+    % colorPos matches sequence on pdf document
+    % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
+    % color_pos(7:12,:) == orange to orange yellow(2nd row)
+    % color_pos(13:18,:) == blue to cyan(3rd row)
+    % color_pos(19:24,:) == white to black (3rd row)
+    
+    for i=2:4
+        colorPos = [                colorPos; 
+                    round(color_pos(end:-1:1,2:-1:1,i))];
+    end
 end
