@@ -305,7 +305,7 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
             1, '', 1);
         checker_found = 1;
         
-        pause
+        
     catch ME
        error =  ME
     end
@@ -391,19 +391,32 @@ function cornersFound = findCorners(img, locations, pixelList)
     avg_white = 0;
     for i=1:length(corners)
         scatter(corners(i,1),corners(i,2),'d','LineWidth',20);
-        rect(i) = rectangle('Position',[corners(i,:)-5 10 10],...
-            'Curvature',[1 1],'LineWidth',5);
-
-        avgPix_R = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-            rect(i).Position(1):rect(i).Position(1)+5,1));
-        R = mean(avgPix_R);
-
-        avgPix_G = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-            rect(i).Position(1):rect(i).Position(1)+5,2));
-        G = mean(avgPix_G);
-        avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-            rect(i).Position(1):rect(i).Position(1)+5,3));
+%         rect(i) = rectangle('Position',[corners(i,:)-5 5 5],...
+%             'Curvature',[1 1],'LineWidth',5);
         
+        offset=-2:2;
+        y = corners(i,2)+offset;
+        x = corners(i,1)+offset;
+        y1 = corners(i,2)-offset;
+        x1 = corners(i,1)+offset;
+        y2 = corners(i,2)+offset;
+        x2 = corners(i,1)-offset;
+        
+%         avgPix_R = mean([img(y,x,1)+img(y1,x1,1)+img(y2,x2,1)]./3);
+%         avgPix_G = mean([img(y,x,2)+img(y1,x1,2)+img(y2,x2,2)]./3);
+%         avgPix_B = mean([img(y,x,3)+img(y1,x1,3)+img(y2,x2,3)]./3);
+        avgPix_R = mean(img(y,x,1));
+        avgPix_G = mean(img(y,x,2));
+        avgPix_B = mean(img(y,x,3));
+%         avgPix_R = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+%             rect(i).Position(1):rect(i).Position(1)+5,1));
+%         avgPix_G = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+%             rect(i).Position(1):rect(i).Position(1)+5,2));
+%         avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+%             rect(i).Position(1):rect(i).Position(1)+5,3));
+        
+        R = mean(avgPix_R);
+        G = mean(avgPix_G);
         B = mean(avgPix_B);
 
         R_minus_B = mean(abs(avgPix_R - avgPix_B));
@@ -431,8 +444,8 @@ function cornersFound = findCorners(img, locations, pixelList)
         
         % finds white
         if avg_pixel > 125 && diff_pix < 60
-            if R_minus_B < 10 || R_minus_G  < 10 ...
-                || G_minus_B  < 10                
+            if R_minus_B < 12 || R_minus_G  < 12 ...
+                || G_minus_B  < 12                
                 if ~isempty(white) && avg_white > 190
                     white = white;
                 else

@@ -15,8 +15,34 @@ function calibratedImg = colorCalibrate(colorPos, refer_color_checker, ...
     bool_calib_checker_itself, img_for_corretion, normalize )
 clc
 
-    checker_sqr_width_pixels = 7; 
-    sides_for_mean_pix_intensity  = round((checker_sqr_width_pixels-1)/2);
+%each begining of a 6-patch line on the checker is represented 
+% in the comments of RGB_ref as  ----------- 
+RGB_ref =  [115     82     68; %(1,:)dark skin (brown) ----------- 
+            194    150    130; %    light skin
+             98    122    157; %    blue sky
+             87    108     67; %    foliage
+            133    128    177; %    blue flower
+            103    189    170; %(6,:)bluish green
+            214    126     44; %(7,:)organge -----------
+             80     91    166;
+            193     90     99;
+             94     60    108;
+            157    188     64; 
+            224    163     46; %(12,:)orange yellow
+             56     61    150; %(13,:)blue -----------
+             70    148     73;
+            175     54     60;
+            231    199     31;
+            187     86    149; 
+              8    133    161; %(18,:)cyan
+            243    243    242; %%(19,:)white-----------
+            200    200    200;
+            160    160    160;
+            122    122    121;
+             85     85     85; 
+             52     52     52];%(24,:)black
+
+
 %% ============ loading pics %color1
     norm = normalize;
     
@@ -35,6 +61,7 @@ clc
         checkImgCam = double(I);
     else %if it is an actual image
         checkImgCam = double(refer_color_checker);
+        I = checkImgCam;
     end
     
     fig_sel = gcf;
@@ -56,7 +83,7 @@ clc
     getname = @(x) inputname(1);
     IMG_FOR_CORRECTION_FILENAME = getname(refer_color_checker);
     
-    imageforcorrection = checkImgCam;
+    I_to_correct = checkImgCam;
     
     if ~bool_calib_checker_itself
         IMG_FOR_CORRECTION_FILENAME = img_for_corretion;
@@ -65,7 +92,7 @@ clc
 %         end
 %         imageforcorrection = double(imread(...
 %             strcat(IMG_FOR_CORRECTION_FILENAME,img_for_corr_extension)));
-        imageforcorrection = double(imread(IMG_FOR_CORRECTION_FILENAME));
+        I_to_correct = double(imread(IMG_FOR_CORRECTION_FILENAME));
     end
 
     %load('colorcoords.mat');
@@ -76,7 +103,7 @@ clc
     RGB = zeros(24, 3);
 
     %% ============ building checkerboard values read from camera
-    margin = sides_for_mean_pix_intensity;
+    %margin = sides_for_mean_pix_intensity;
     
     %color_pos
     % colorPos matches sequence on pdf document
@@ -88,12 +115,19 @@ clc
     for i = 1:24 % image(pixel_vertical,pixel_horizontal,[R G B])
         
        %rectangle for average of colors
-       rect = rectangle('Position',[colorPos(i,:)-5 10 10],'Curvature',[1 1],'LineWidth',5);
+       rect = rectangle('Position',[colorPos(i,2) colorPos(i,1) 10 10],'Curvature',[1 1],'LineWidth',5);
        
        %rect = rectangle('Position',[colorPos(i,:)-5 10 10],'Curvature',[1 1],'LineWidth',5);
+
+%        avgPix(1,:) = mean(mean(checkImgCam(...
+%            colorPos(i,1):colorPos(i,1)+5, ...
+%            colorPos(i,2):colorPos(i,2)+5,:)))
+
+       
+       
        avgPix(1,:) = mean(mean(checkImgCam(...
-           rect.Position(1):rect.Position(1)+5, ...
-           rect.Position(2):rect.Position(2)+5,:)))
+           rect.Position(2):rect.Position(2)+5, ...
+           rect.Position(1):rect.Position(1)+5,:)))
         
         RGB(i, :) = avgPix(1,:);
         
@@ -160,7 +194,7 @@ clc
     
     %% ============ getting corrected image 2nd version
 
-    imagecorrected2 = correctcolor3(M, imageforcorrection); 
+    imagecorrected2 = correctcolor3(M, I_to_correct); 
 
     %% ============ calculating error 2nd version
 
@@ -297,26 +331,7 @@ function RGBCOR = correctcolor3(transfMatrix, image)
     G = RGBCOR(:,2);
     B = RGBCOR(:,3);
     
-    
-        
-%     for i=1:length(image) % E_m IS 3X1 column vector
-%         E_M = E_M + ( (abs(M*P(:,i)-Q(:,:))).^2 );
-%     end
-
-%     vals = [ones(n, 1), image, image.^2];
-%     
-%     calcosR = transfMatrix(:, 1)';
-%     calcosG = transfMatrix(:, 2)';
-%     calcosB = transfMatrix(:, 3)';
-%     
-%     calcosR = repmat(calcosR, size(vals,1), 1);
-%     calcosG = repmat(calcosG, size(vals,1), 1);
-%     calcosB = repmat(calcosB, size(vals,1), 1);
-%     
-%     R = sum(vals .* calcosR, 2);
-%     G = sum(vals .* calcosG, 2);
-%     B = sum(vals .* calcosB, 2);
-%     
+      
      minR = min(R);
      maxR = max(R);
      R = (R - minR) ./ (maxR - minR) .* 255;
@@ -330,8 +345,4 @@ function RGBCOR = correctcolor3(transfMatrix, image)
      B = (B - minB) ./ (maxB - minB) .* 255;
 
       RGBCOR = [R, G, B];
-%     minRGB = min(min(RGBCOR));
-%     maxRGB = max(max(RGBCOR));
-%     RGBCOR = (RGBCOR - minRGB) ./ (maxRGB - minRGB);
-    
 end
