@@ -34,7 +34,7 @@ clc
         I = imread(COLOR_CHECKER_IMG_NAME);
         checkImgCam = double(I);
     else %if it is an actual image
-        checkImgCam = refer_color_checker;
+        checkImgCam = double(refer_color_checker);
     end
     
     fig_sel = gcf;
@@ -88,21 +88,12 @@ clc
     for i = 1:24 % image(pixel_vertical,pixel_horizontal,[R G B])
         
        %rectangle for average of colors
-       rect = rectangle('Position',[colorPos(i,:)-5 10 10],...
-            'Curvature',[1 1],'LineWidth',5);
+       rect = rectangle('Position',[colorPos(i,:)-5 10 10],'Curvature',[1 1],'LineWidth',5);
+       
+       %rect = rectangle('Position',[colorPos(i,:)-5 10 10],'Curvature',[1 1],'LineWidth',5);
        avgPix(1,:) = mean(mean(checkImgCam(...
            rect.Position(1):rect.Position(1)+5, ...
            rect.Position(2):rect.Position(2)+5,:)))
-        
-%         avgPix_R = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,1));
-%         R = mean(avgPix_R);
-% 
-%         avgPix_G = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,2));
-%         G = mean(avgPix_G);
-%         avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,3));
         
         RGB(i, :) = avgPix(1,:);
         
@@ -181,10 +172,10 @@ clc
     
     P_RGB_norm_calibrated = P_RGB_norm*M; %normalized when norm
     
-    Error_after_calibration = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm_calibrated(:))) / (3 * 24)
-    MSE_calibration_norm_when_norm = immse(P_RGB_norm_calibrated, P_RGB_norm)
+    Error_after_calibration = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm_calibrated(:))) / (3 * 24);
+    MSE_calibration_norm_when_norm = immse(P_RGB_norm_calibrated, P_RGB_norm);
     
-    [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm_calibrated,Q_RGB_ref_norm)
+    [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm_calibrated,Q_RGB_ref_norm);
     
 
     %% ============ save and display setup
@@ -215,11 +206,13 @@ clc
     if normalize
         normalized = 'normalized';
     end
+    hold off
     
     I_diff = imshowpair(I,imagecorrected2);
     I_diff.Visible = 'off';
     %figure('Name','color_calib');
     imshow([I,imagecorrected2,I_diff.CData])
+    a = gcf;
     title('original    ---   calibrated    ---   difference between the two');
         
     xlabel(['color calibration (',normalized,')']);
@@ -227,7 +220,10 @@ clc
     newFileName2 = writeNewFileName(IMG_FOR_CORRECTION_FILENAME2,'png');
     newFileName2 = strcat('\',newFileName2);
     newFileName2 = char(strcat(new_folder,newFileName2));
+    pause
     
+    close(a);
+    hold on
     
     imwrite(imagecorrected2, char(newFileName2));
     calibratedImg = imagecorrected2;

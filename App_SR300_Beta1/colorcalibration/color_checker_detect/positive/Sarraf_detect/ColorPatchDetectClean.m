@@ -19,6 +19,9 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
         % I1=I1(:,:,3);
         disp(img_char);
         rgb1=imread(img_char);
+       % rgb1 = flip(rgb1)
+        
+        
         if size(rgb1,1)/size(rgb1,2) > .68...
            && size(rgb1,1)/size(rgb1,2) < .8
             rgb1 = imresize(rgb1,[480 640]);
@@ -270,7 +273,7 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
         colorPos = zeros(24,3);
         
         if cornersFound
-            colorPos = findAllColors(cornersFound)
+            colorPos = findAllColors(cornersFound);
             scatter(colorPos(1:6,2), colorPos(1:6,1),'LineWidth',15);
             % bluish green
             scatter(colorPos(6,2), colorPos(6,1),'LineWidth',15);
@@ -297,6 +300,9 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
 
         
         hold off
+        pause
+        colorCalibrate(colorPos, rgb1, ...
+            1, '', 1);
         checker_found = 1;
         
         pause
@@ -406,6 +412,7 @@ function cornersFound = findCorners(img, locations, pixelList)
 
         avg_pixel = mean(avgPix_R + avgPix_G + avgPix_B)/3;
         diff_pix = (R_minus_B + G_minus_B  + R_minus_G )/3;
+        
         [R, G, B]
         [R_minus_B, R_minus_G, G_minus_B]
         [avg_pixel, diff_pix]
@@ -414,7 +421,14 @@ function cornersFound = findCorners(img, locations, pixelList)
         %oneDiff_is_zero = ~(R_minus_B || R_minus_G || G_minus_B);
         max_diff = max([R_minus_B, R_minus_G, G_minus_B]);
         min_diff = min([R_minus_B, R_minus_G, G_minus_B]);
-        diff_betwMaxAdnMinDiff = max_diff  - min_diff;
+        
+        
+        maxRGB = max([R G B]);
+        minRGB = min([R G B]);
+        
+        diff_betwMaxAdnMinDiff = maxRGB - minRGB;
+        %diff_betwMaxAdnMinDiff = max_diff  - min_diff;
+        
         % finds white
         if avg_pixel > 125 && diff_pix < 60
             if R_minus_B < 10 || R_minus_G  < 10 ...
@@ -422,7 +436,7 @@ function cornersFound = findCorners(img, locations, pixelList)
                 if ~isempty(white) && avg_white > 190
                     white = white;
                 else
-                    if diff_betwMaxAdnMinDiff < 47
+                    if diff_betwMaxAdnMinDiff < 20
                         avg_white = avg_pixel;
                         white = corners(i,:);
                         i_white = i;
@@ -433,7 +447,7 @@ function cornersFound = findCorners(img, locations, pixelList)
                 if ~isempty(white) && avg_white > 200
                     white = white;
                 else
-                    if  diff_betwMaxAdnMinDiff < 47
+                    if  diff_betwMaxAdnMinDiff < 50
                         avg_white = avg_pixel;
                         white = corners(i,:);
                         i_white = i;

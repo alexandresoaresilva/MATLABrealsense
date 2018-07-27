@@ -1,7 +1,6 @@
 clear, clc;
-target_folder = 'checker_imgs';
+target_folder = 'checker_imgs\colorCalTrouble';
 addpath(target_folder);
-
 
 % img_names = "check0.png";
 [img_names, img2]  = save_file_names_in_folder(target_folder,'png');
@@ -17,10 +16,10 @@ colorPos = zeros(24,3);
 j = 0;
 for img_i=1:size(img_names,1)
     [colorPos, checker_found, error] = ColorPatchDetectClean(deblank(img2(img_i,:)));
-    if colorPos 
-        colorCalibrate(colorPos, img2(img_i,:), ...
-            1, '', 1);
-    end
+%     if colorPos 
+%         colorCalibrate(colorPos, img2(img_i,:), ...
+%             1, '', 1);
+%     end
     if ~isempty(error) && checker_found %only records the error if checker was found
         failed_imgs(j+1,:) = img_names(img_i,:);
         failure(j + 1) = error; %exception returned by function, if there was one
