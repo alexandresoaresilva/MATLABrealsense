@@ -1,7 +1,7 @@
-% arguments (minimum 1): 
+% arguments (minimum 1): I, check_from_cam, 
 %       1. I : image to be calibrated ; if the only argument, it's assumed
 %               it's a Macbeth color checker
-%       2. ref_checker : Macbeth color checkerboard picture, taken under 
+%       2. check_from_cam : Macbeth color checkerboard picture, taken under 
 %                   the same conditions as the image to be calibrated.
 %                   if only two arguments, this will be calibrated without
 %                   normalization
@@ -12,14 +12,22 @@ function calib_img = colorCalib(varargin)
 % storing variables for use within the function
 I = double(varargin{1}); %img
 norm = 0;
-ref_checker = I;
-if length(varargin) > 1
-    ref_checker = varargin{2};
-    if length(varargin) == 3
-        if strcmp(lower(varargin{3}),'normalized')
+check_from_cam = double(I);
+switch(length(varargin))
+    case 2
+        if strcmp(lower(varargin{2}),'normalized')
             norm  = 1;
         end
+    case 3
+    
+    
+    if strcmp(lower(varargin{3}),'normalized')
+        norm  = 1;
     end
+    if size(varargin{2},3) > 1
+        check_from_cam = double(varargin{2});
+    else
+
 end
 
 %% each begining of a 6-patch line on the checker is represented 
@@ -50,5 +58,14 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
              52     52     52];%(24,:)black
         
 %% code co
-calib_img = 1;
+
+
+
+
+
+
+
+
+
+
 end

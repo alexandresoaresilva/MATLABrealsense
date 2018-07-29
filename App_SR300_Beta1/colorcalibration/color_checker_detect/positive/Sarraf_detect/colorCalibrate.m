@@ -48,7 +48,7 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
     
     %eliminates whitespace at the end of the names
     COLOR_CHECKER_IMG_NAME = '';
-    checkImgCam = 0;
+    check_from_cam = 0;
      %% checker load   
      
      I = 0;
@@ -58,10 +58,10 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
         refer_color_checker = deblank(refer_color_checker);
         COLOR_CHECKER_IMG_NAME = refer_color_checker;
         I = imread(COLOR_CHECKER_IMG_NAME);
-        checkImgCam = double(I);
+        check_from_cam = double(I);
     else %if it is an actual image
-        checkImgCam = double(refer_color_checker);
-        I = checkImgCam;
+        check_from_cam = double(refer_color_checker);
+        I = check_from_cam;
     end
     
     fig_sel = gcf;
@@ -83,7 +83,7 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
     getname = @(x) inputname(1);
     IMG_FOR_CORRECTION_FILENAME = getname(refer_color_checker);
     
-    I_to_correct = checkImgCam;
+    I_to_correct = check_from_cam;
     
     if ~bool_calib_checker_itself
         IMG_FOR_CORRECTION_FILENAME = img_for_corretion;
@@ -125,7 +125,7 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
 
        
        
-       avgPix(1,:) = mean(mean(checkImgCam(...
+       avgPix(1,:) = mean(mean(check_from_cam(...
            rect.Position(2):rect.Position(2)+5, ...
            rect.Position(1):rect.Position(1)+5,:)))
         
@@ -213,13 +213,13 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
     
 
     %% ============ save and display setup
-    checkImgCam = uint8(checkImgCam);
-    height = size(checkImgCam, 1);
-    width = size(checkImgCam, 2);
+    check_from_cam = uint8(check_from_cam);
+    height = size(check_from_cam, 1);
+    width = size(check_from_cam, 2);
     
     %imagecor = uint8(reshape(imagecor(:), height, width, 3));
-    height = size(checkImgCam, 1);
-    width = size(checkImgCam, 2);
+    height = size(check_from_cam, 1);
+    width = size(check_from_cam, 2);
     %imagecorrected = uint8(reshape(imagecorrected(:), height, width, 3));
     imagecorrected2 = uint8(reshape(imagecorrected2(:), height, width, 3));
 

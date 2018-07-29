@@ -29,7 +29,7 @@ j = 0;
 %     end
 % end
 
-calib_img = colorCalib(imread(img2(3,:)), imread(img2(2,:)),'normalized');
+%calib_img = colorCalib(imread(img2(3,:)), imread(img2(2,:)),'normalized');
 
 if ~isempty(failure) %if there's an exception saved, builds table
      %with file name and related exception
