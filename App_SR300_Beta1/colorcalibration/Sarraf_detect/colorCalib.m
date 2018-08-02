@@ -1,37 +1,62 @@
-% arguments (minimum 1): I, check_from_cam, 
-%       1. I : image to be calibrated ; if the only argument, it's assumed
-%               it's a Macbeth color checker
-%       2. check_from_cam : Macbeth color checkerboard picture, taken under 
-%                   the same conditions as the image to be calibrated.
-%                   if only two arguments, this will be calibrated without
-%                   normalization
-%       3. 'normalized' : if present, RGB vectors are divided by their sum
-%       in both the samples and in the reference values
-
-% %IMG_FOR_CORRECTION_FILENAME = getname(ref_checker);
-% %from https://www.mathworks.com/matlabcentral/answers/263718-what-is-the-best-way-to-get-the-name-of-a-variable-in-a-script
-
-%RETURNS
-function [calib_img, M] = colorCalib(varargin)
- 
-    norm = 0;
-    check_from_cam = varargin{1}; %it's the checkers; it's going to be calibrated
-    if length(varargin) > 1 && strcmpl(varargin{2},'normalized')
-        norm  = 1; % RGB vectors are normalized
-    end
-        
-    %color_pos
-    % colorPos matches sequence on pdf document
-    % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
-    % color_pos(7:12,:) == orange to orange yellow(2nd row)
-    % color_pos(13:18,:) == blue to cyan(3rd row)
-    % color_pos(19:24,:) == white to black (3rd row)
-    [colorPos, error] = ColorPatchDetectClean(check_from_cam);
-    check_from_cam = double(check_from_cam);
+function [calib_img, M] = colorCalib(check_from_cam, img_name, norm)
+% INPUTS
+%     check_from_cam : Macbeth 6x4 color checker captured in a environment 
+%                     of interest
+%     img_name : character vector with the image's filename 
+%                 (so it can be compared with other images )
+%     norm : 1 for normalized 3x3 color calibration matrix, 0 for not
+%     normalized
+% OUTPUTS
+%     calib_img : calibrated checkerboard
+%     M : color calbiration 3x3 matrix. If fed to the function 
+%               calibration_routine with a new image from the same set as
+%               the color checker image, it calibrates it
+    [colorPos, error] = ColorPatchDetect(check_from_cam, img_name);
+    M = getTransfMatrix(check_from_cam,colorPos, norm);
+    calib_img = calibration_routine(M, check_from_cam); 
     
-    %% each begining of a 6-patch line on the checker is represented 
+    normalized = 'not normalized';
+    if norm
+        normalized = 'normalized';
+    end
+    hold off
+    
+    I_diff = imshowpair(check_from_cam,calib_img);
+    I_diff.Visible = 'off';
+    %figure('Name','color_calib');
+    imshow([check_from_cam,calib_img,I_diff.CData])
+    a = gcf;
+    title('original    ---   calibrated    ---   difference between the two');
+    xlabel(['color calibration (',normalized,')']);
+    pause
+    close(a);
+    hold on
+end
+
+function M = getTransfMatrix(check_from_cam,colorPos, norm)
+% INPUTS
+%     check_from_cam : Macbeth 6x4 color checker captured in a environment 
+%                     of interest
+%     colorPos : character vector with the image's filename 
+%                 (so it can be compared with other images )
+%     norm : 1 for normalized 3x3 color calibration matrix, 0 for not
+%     normalized
+% OUTPUTS
+%     calib_img : calibrated checkerboard
+%     M : color calbiration 3x3 matrix. If fed to the function 
+%               calibration_routine with a new image from the same set as
+%               the color checker image, it calibrates it
+
+        % M: matrix that minimizes the least squares regression (3x3)
+            % calculated with inverse penrose; 
+    
+            % in Bastani and Funti (2014)
+            % result is 3x3 matrix (equivalent to Px = Q)
+
+    check_from_cam = double(check_from_cam);
+%    each begining of a 6-patch line on the checker is represented 
     % in the comments of RGB_ref as  ----------- 
-    %RGB_ref RGBREF
+    %RGB_ref RGBREF    
     RGB_ref_values  =  [115     82     68; %(1,:)dark skin (brown) ----------- 
                         194    150    130; %    light skin
                          98    122    157; %    blue sky
@@ -50,16 +75,13 @@ function [calib_img, M] = colorCalib(varargin)
                         231    199     31;
                         187     86    149; 
                           8    133    161; %(18,:)cyan
-                        243    243    242; %%(19,:)white-----------
+                        243    243    242; %(19,:)white-----------
                         200    200    200;
                         160    160    160;
                         122    122    121;
                          85     85     85; 
                          52     52     52];%(24,:)black
-%% ============ building checkerboard values read from camera
-    %margin = sides_for_mean_pix_intensity;
 
-    
     RGB_from_pic = zeros(24, 3);
     
     for i = 1:length(colorPos) % image(pixel_vertical,pixel_horizontal,[R G B])
@@ -67,42 +89,18 @@ function [calib_img, M] = colorCalib(varargin)
         x = colorPos(i,2)+offset;
         y = colorPos(i,1)+offset;
         
-       %rectangle for average of colors
-%        rect = rectangle('Position',[colorPos(i,2) colorPos(i,1) 10 10],...
-%            'Curvature',[1 1],'LineWidth',5);
-%        avgPix(1,:) = mean(mean(check_from_cam(...
-%            rect.Position(2):rect.Position(2)+5, ...
-%            rect.Position(1):rect.Position(1)+5,:)))
-        avgPix(1,:) = mean(mean(check_from_cam(y,x,:)))
+        avgPix(1,:) = mean(mean(check_from_cam(y,x,:)));
         RGB_from_pic(i, :) = avgPix(1,:);
     end
-
-    %load('RGBtopcam2.mat');
     
-
-    %% ============ getting calibration matrix
-    %norms
-    %calcos = calibratecolor(RGBREF, RGB);
-
-
-    %% <<<<<<<<<<<<<<<<<<<<<<<< 2nd method >>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    % =================================================================
-    % =================================================================
-
     % getting normalized (UNIT VECTORS) column vectors of RGB value
     % (mapping them to the unit sphere)
-    % in Bastin et all, RGB == RGB and XYZ == RGB_reg 
+    % in Bastani and Funti, RGB == RGB and XYZ == RGB_reg 
     P_RGB_norm = zeros(24,3);
     Q_RGB_ref_norm = zeros(24,3);
 
     P_RGB_norm = RGB_from_pic;
     Q_RGB_ref_norm = RGB_ref_values;
-    %mean_sqr_error_refer = immse(P_RGB_norm,Q_RGB_ref_norm )
-%     Err_before_cal = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm(:))) / (3 * 24)
-%     MSE_err_before_cal = immse(Q_RGB_ref_norm, P_RGB_norm)
-%     
-%     %LS_error_before_cal = lscov(P_RGB_norm,Q_RGB_ref_norm)
-%     [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm,Q_RGB_ref_norm)
     
     if norm %if normalized 
         for i = 1:length(RGB_ref_values)% image(pixel_vertical,pixel_horizontal,[R G B])
@@ -117,7 +115,7 @@ function [calib_img, M] = colorCalib(varargin)
         end
     end
 
-    %% transpose to follow logic 3x24 (24 column vectors representing colors, 3
+    % transpose to follow logic 3x24 (24 column vectors representing colors, 3
     % channels (one per row)
     %P = P_RGB_norm';
     %[M, M_scaled, transVect1, transformMAtrix2]   = calibratecolor3(P_RGB_norm, Q_RGB_ref_norm);
@@ -132,45 +130,6 @@ function [calib_img, M] = colorCalib(varargin)
     %M =  Q*P'*(inv(P*P'));
     
     M = P_RGB_norm\Q_RGB_ref_norm;
-    %% ============ getting corrected image 2nd version
-
-    imagecorrected2 = calibration_routine(M, check_from_cam); 
-    %check_from_cam = uint8(check_from_cam);
-    
-    height = size(check_from_cam, 1);
-    width = size(check_from_cam, 2);
-    imagecorrected2 = uint8(reshape(imagecorrected2(:), height, width, 3));
-    calib_img = imagecorrected2;
-    %% ============ calculating error 2nd version
-
-%     errormatrix = abs(RGBREF - RGB);
-%     figure(1)
-%     barcolorm = [1 0 0; 0 1 0; 0 0 1];
-%     b = bar(errormatrix,'FaceColor','flat');
-%     index = 1; 
-%     Error_after_calibration = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm_calibrated(:))) / (3 * 24);
-%     MSE_calibration_norm_when_norm = immse(P_RGB_norm_calibrated, P_RGB_norm);
-%     
-%     [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm_calibrated,Q_RGB_ref_norm);
-    %% ============ save and display setup
-    % X corrected with M not scaled
-    
-    normalized = 'not normalized';
-    if norm
-        normalized = 'normalized';
-    end
-    hold off
-    
-    I_diff = imshowpair(check_from_cam,imagecorrected2);
-    I_diff.Visible = 'off';
-    %figure('Name','color_calib');
-    imshow([check_from_cam,imagecorrected2,I_diff.CData])
-    a = gcf;
-    title('original    ---   calibrated    ---   difference between the two');
-    xlabel(['color calibration (',normalized,')']);
-    pause
-    close(a);
-    hold on
 end
 
 % function calcos = calibratecolor(RGBREF, RGB) 
@@ -182,26 +141,19 @@ end
 %     calcos = [calcosR, calcosG, calcosB];
 % end
 
-% M 
-% function [M, M_scaled, transformMAtrix1, transformMAtrix2]  = calibratecolor3(P,Q)
-%     % M: matrix that minimizes the least squares calculation (3x3)
-%     % M: calculated with inverse penrose; 
-%     % M_scaled: all elements divided by sum(M(2,:)), 
-%     % in Bastani and Funti (2014)
-%     % result is 3x3 matrix (equivalent to Px = Q)
-%     %transformation_Matrix_0 is a 3x1 vect, M calculated from invers
-%     %transformation_Matrix_2 is a 3x1 vect, with M scaled 
-%    %
-%     %M =  Q*P'*(inv(P*P'));
-%     
-%     M = P\Q;
-% end
-function RGBCOR = calibration_routine(transfMatrix, image) 
-%function RGBCOR = correctcolor3(transfMatrix, image) 
-    %RGB are arrays of integers 0-255 X elements long, calcos is a 10x3 matrix 
-    image = reshape(image(:), [], 3);
+function RGBCOR = calibration_routine(M, I)
+    
+
+    
+    %getting the height and width before horizontalizing the image
+    I = double(I);
+    
+    height = size(I, 1);
+    width = size(I, 2);
+    
+    I = reshape(I(:), [], 3);
     %n = size(RGB, 1);
-    RGBCOR = image*transfMatrix;
+    RGBCOR = I*M;
     R = RGBCOR(:,1);
     G = RGBCOR(:,2);
     B = RGBCOR(:,3);
@@ -220,34 +172,27 @@ function RGBCOR = calibration_routine(transfMatrix, image)
      B = (B - minB) ./ (maxB - minB) .* 255;
 
     RGBCOR = [R, G, B];
+    RGBCOR = uint8(reshape(RGBCOR(:), height, width, 3));
+    %calib_img = imagecorrected2;
 end
 
 % Author: Dr. Hamed Sari-Sarraf
 % input:
 % outputs: 
-function [colorPos, error] = ColorPatchDetectClean(rgb1)
+function [colorPos, error] = ColorPatchDetect(rgb1,img_name)
+    %color_pos
+    % colorPos matches sequence on pdf document
+    % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
+    % color_pos(7:12,:) == orange to orange yellow(2nd row)
+    % color_pos(13:18,:) == blue to cyan(3rd row)
+    % color_pos(19:24,:) == white to black (3rd row)
     addpath(pwd);
-    
     error = MException.empty();
-    checker_found = 0;
     colorPos = 0;
     close all
     try
-        % cam = webcam(2);
-        % cam.Resolution='640x480';
-        % preview(cam);
-        % pause;
-        % rgb1 = snapshot(cam);
-        % clear('cam')
-        % I1=rgb2hsv(rgb1);
-        % I1=I1(:,:,3);
-%         disp(img_char);
-%         rgb1=imread(img_char);
-       % rgb1 = flip(rgb1)
-
-        getname = @(x) inputname(1);
-        img_char = getname(rgb1);
-
+%         getname = @(x) inputname(1);
+%         img_name = getname(rgb1);
         
         if size(rgb1,1)/size(rgb1,2) > .68...
            && size(rgb1,1)/size(rgb1,2) < .8
@@ -260,17 +205,13 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         I1=rgb2hsv(rgb1);
         I1=I1(:,:,3);
 
-        % I1 = imgaussfilt(I1,1);
-        figure('Name',img_char);
+        figure('Name',img_name);
         imshow(I1)
-        title(img_char);
+        title(img_name);
 
         %constrain in number of pixels
         [regions]=detectMSERFeatures(I1,'RegionAreaRange',[1000 10000]);
-        %[regions]=detectMSERFeatures(I1,'RegionAreaRange',[1000 10000]);
 
-        %majorAxis / minorAxis; if <= 0.9 it's too distorted to be a circle
-        %circular=(regions.Axes(:,2)./regions.Axes(:,1))>0.9;
         circular=(regions.Axes(:,2)./regions.Axes(:,1))>0.9;
         %assigning empty values to regions that are not circles
         regions(circular==0)=[];
@@ -289,12 +230,12 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         % tar_reg(:,1) == x from regions' pixel list
         % sub2ind finds linear index within img
         BW(sub2ind(size(I1),tar_reg(:,2),tar_reg(:,1)))=1;
-        figure('Name',img_char);
+        figure('Name',img_name);
         %binary img with regions of interest in white
         % [] scales pixel intensity to 
         % black for min and white to max
         imshow(BW,[]);
-        title(img_char);
+        title(img_name);
         %T3 is non-singular (det non-zero)
         T3=[1 0 0; 0 1 0; -5 -5 1];
         %sets of parallel lines remain parallet after affine transform
@@ -321,9 +262,6 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
             stats.Area<mean(stats.Area)-3*std(stats.Area);
         %if sizefilt not empty, assign 0 to pixels within areas 
         %beyond constrain
-%         if ~isempty(find(sizefilt))
-%            BW( L == find(sizefilt) )=0;
-%         end
         if any(find(sizefilt))
            BW( L == find(sizefilt) )=0;
         end
@@ -331,7 +269,7 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         stats = regionprops('table',bwlabel(BW),'Centroid');
         figure
         imshow(BW,[]);
-        title(img_char);
+        title(img_name);
         %L is a numerical labels matrix
         % B is a list of objects cell array 
             % each of its indexes is a list of pixels that form
@@ -340,7 +278,7 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         figure
         %plots different colors for each diff. object
         imshow(label2rgb(L, @jet, [.5 .5 .5]))
-        title(img_char);
+        title(img_name);
         hold on
         bou=zeros(size(I1));
         for k = 1:length(B)
@@ -376,7 +314,7 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         plot(rotang,rho,'s','color','white');
         % figure
         % imshow(imrotate(I1,rotang),[])
-        %% 
+        % 
         % imrotate(bou,rotang,'nearest','crop'): 2x2 nearest neighboor interpol.
         %   rotang: angle for better horizontal alingment
         %   bou: img with drawn (binary) boundaries
@@ -407,7 +345,7 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
 
         figure
         imshow(BW,[]);
-        title(img_char);
+        title(img_name);
         hold on
         plot(stats.Centroid(:,1),stats.Centroid(:,2),'r*')
         % makes centroids' locations white on mask
@@ -480,8 +418,8 @@ function [colorPos, error] = ColorPatchDetectClean(rgb1)
         
         figure
         imshow((0.8*rgb1+0.2*mask),[]);
-        title(img_char);
-        disp(['Pic: ', img_char]);
+        title(img_name);
+        disp(['Pic: ', img_name]);
         hold on
 %     cornersFound = [bluishGreen;
 %                     black;
@@ -535,35 +473,37 @@ end
 % Written by Alexandre Soares da Silva
 % reorganizes locations to follow % brown to bluish green
 % 
+
 function cornersFound = findCorners(img, locations, pixelList)
     %corners are
     %x(1), y(1) bluish green
     %x(2), y(2) black
     %x(3), y(3) brown
     %x(4), y(4) white
-    
-    img = img*1.01;
-    b = convhull(locations(:,1),locations(:,2));
-    convHul = [locations(b,1) locations(b,2)];
-    norm_colected = zeros(length(convHul),1);
 
-    %% gets distances between components of the convex hull;
+
+    img = img*1.01;
+%     b = convhull(locations(:,1),locations(:,2));
+%     convHul = [locations(b,1) locations(b,2)];
+    norm_colected = zeros(length(locations),1);
+
+    % gets distances between components of the convex hull;
     % guaranteed to return corners (they are an integral part of the
     % 4-sided polygon that represents the patches (mostly a rectangle, but
     % sometimes a rhombus
     
-    for i=1:length(convHul)
+    for i=1:length(locations)
         %taking the distances between all the vertices of the covnex hull
         %and the i_th point
-        norm_colected(:,i) = vecnorm(convHul - convHul(i,:),2,2);... 
+        norm_colected(:,i) = vecnorm(locations - locations(i,:),2,2);... 
         %max norm for each iteration + index
         [maxNorm, i_max] = max(norm_colected(:,i));
         %i_max is the index of the i_th point with relation to
         % i_MaxFina_l (distance between them is max
         max_norm_colected(i,:) = [i_max, maxNorm];
     end
-
-    %% gets largest 2 distances between points
+    
+    % gets largest 2 distances between points
     %   runs twice at each point because there'll be to two distances 
     %   that are the same - from point 1 to point 2 and vice versa
     %   when the first max is eliminated, then points with max distance
@@ -584,10 +524,11 @@ function cornersFound = findCorners(img, locations, pixelList)
     i_MaxFinal_12 = max_norm_colected(i_MaxFina_l,1);
     
     %get corner coordinates
-    corners = [ convHul(i_MaxFina_l,1), convHul(i_MaxFina_l,2);...
-                convHul(i_MaxFinal_12,1), convHul(i_MaxFinal_12,2)];
+    corners = [ locations(i_MaxFina_l,1), locations(i_MaxFina_l,2);...
+                locations(i_MaxFinal_12,1), locations(i_MaxFinal_12,2)];
     % repeat operation, now without the previous max
     max_norm_colected(i_MaxFina_l,2) = 0;
+    
     
 %3rd run - eliminates repetition fromm the 3rds-4th and 4th-3rd corners
     %1st run on points 3,4
@@ -605,8 +546,10 @@ function cornersFound = findCorners(img, locations, pixelList)
     max_norm_colected(i_MaxFinal_2,2) = 0;
     
     corners = [ corners; 
-                convHul(i_MaxFinal_2,1),convHul(i_MaxFinal_2,2);...
-                convHul(i_MaxFinal_22,1),convHul(i_MaxFinal_22,2)];
+                locations(i_MaxFinal_2,1),locations(i_MaxFinal_2,2);...
+                locations(i_MaxFinal_22,1),locations(i_MaxFinal_22,2)];
+    
+    i_pixList = [i_MaxFina_l i_MaxFinal_12 i_MaxFinal_2 i_MaxFinal_22];
     
     white = zeros(1,2);
     i_white =0;
@@ -617,23 +560,17 @@ function cornersFound = findCorners(img, locations, pixelList)
         offset=-2:2;
         y = corners(i,2)+offset;
         x = corners(i,1)+offset;
-        y1 = corners(i,2)-offset;
-        x1 = corners(i,1)+offset;
-        y2 = corners(i,2)+offset;
-        x2 = corners(i,1)-offset;
         
-%         avgPix_R = mean([img(y,x,1)+img(y1,x1,1)+img(y2,x2,1)]./3);
-%         avgPix_G = mean([img(y,x,2)+img(y1,x1,2)+img(y2,x2,2)]./3);
-%         avgPix_B = mean([img(y,x,3)+img(y1,x1,3)+img(y2,x2,3)]./3);
+        x1 = pixelList{i_pixList(i)}(:,1);
+        y1 = pixelList{i_pixList(i)}(:,2);
+        
+        avgPix_R1 = mean(img(y1,x1,1));
+        
+        
         avgPix_R = mean(img(y,x,1));
         avgPix_G = mean(img(y,x,2));
         avgPix_B = mean(img(y,x,3));
-%         avgPix_R = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,1));
-%         avgPix_G = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,2));
-%         avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
-%             rect(i).Position(1):rect(i).Position(1)+5,3));
+
         
         R = mean(avgPix_R);
         G = mean(avgPix_G);
@@ -689,8 +626,7 @@ function cornersFound = findCorners(img, locations, pixelList)
             end
         end
     end
-
-    %% calculate distance from white
+    % calculate distance from white
     %distance1 = vecnorm(corners(i+3,:) - corners(i,:),2,2);
     if i_white %if white was found
         dist_whiteFromOthers = zeros(4,1);
@@ -724,8 +660,200 @@ function cornersFound = findCorners(img, locations, pixelList)
     rad2deg(atan2(y_diff, x_diff))
 end
 
+%  CONVEX HULL BASED
+% function cornersFound = findCorners(img, locations, pixelList)
+%     %corners are
+%     %x(1), y(1) bluish green
+%     %x(2), y(2) black
+%     %x(3), y(3) brown
+%     %x(4), y(4) white
+% 
+% %  CONVEX HULL BASED
+%     img = img*1.01;
+%     b = convhull(locations(:,1),locations(:,2));
+%     convHul = [locations(b,1) locations(b,2)];
+%     norm_colected = zeros(length(convHul),1);
+% 
+%     % gets distances between components of the convex hull;
+%     % guaranteed to return corners (they are an integral part of the
+%     % 4-sided polygon that represents the patches (mostly a rectangle, but
+%     % sometimes a rhombus
+%     
+%     for i=1:length(convHul)
+%         %taking the distances between all the vertices of the covnex hull
+%         %and the i_th point
+%         norm_colected(:,i) = vecnorm(convHul - convHul(i,:),2,2);... 
+%         %max norm for each iteration + index
+%         [maxNorm, i_max] = max(norm_colected(:,i));
+%         %i_max is the index of the i_th point with relation to
+%         % i_MaxFina_l (distance between them is max
+%         max_norm_colected(i,:) = [i_max, maxNorm];
+%     end
+% 
+% 
+%     
+%     % gets largest 2 distances between points
+%     %   runs twice at each point because there'll be to two distances 
+%     %   that are the same - from point 1 to point 2 and vice versa
+%     %   when the first max is eliminated, then points with max distance
+%     %   are sored
+%     
+%     %1st run - eliminates repetition fromm the 1s-2nd and 2nd-1st corners
+%     %i_MaxFinal serves as index to normHul, 1st point (i_th point)
+%     [ maxfinal_1, i_MaxFina_l] = max(max_norm_colected(:,2));
+%     %i_MaxFinal2 serves as index to normHul, 2nd point
+%     i_MaxFinal_12 = max_norm_colected(i_MaxFina_l,1);
+%     % repeat operation, now without the previous max
+%     max_norm_colected(i_MaxFina_l,2) = 0;
+%     
+%     %2nd run on point 1,2 - final storage happens here
+%     %i_MaxFinal serves as index to normHul, 1st point (i_th point)
+%     [ maxfinal_1, i_MaxFina_l] = max(max_norm_colected(:,2));
+%     %i_MaxFinal2 serves as index to normHul, 2nd point
+%     i_MaxFinal_12 = max_norm_colected(i_MaxFina_l,1);
+%     
+%     %get corner coordinates
+%     corners = [ convHul(i_MaxFina_l,1), convHul(i_MaxFina_l,2);...
+%                 convHul(i_MaxFinal_12,1), convHul(i_MaxFinal_12,2)];
+%     % repeat operation, now without the previous max
+%     max_norm_colected(i_MaxFina_l,2) = 0;
+%     
+% %3rd run - eliminates repetition fromm the 3rds-4th and 4th-3rd corners
+%     %1st run on points 3,4
+%     [ ~, i_MaxFinal_2] = max(max_norm_colected(:,2));
+%     %i_MaxFinal2 serves as index to normHul, 2nd point
+%     i_MaxFinal_22 = max_norm_colected(i_MaxFinal_2,1);
+%     max_norm_colected(i_MaxFinal_2,2) = 0;
+%     
+% %4th run
+%     %2nd run on points 3,4 (storage)
+%     [ ~, i_MaxFinal_2] = max(max_norm_colected(:,2));
+%     %i_MaxFinal2 serves as index to normHul, 2nd point
+%     i_MaxFinal_22 = max_norm_colected(i_MaxFinal_2,1);
+% %     max_norm_colected(i_MaxFinal_22,2) = 0
+%     max_norm_colected(i_MaxFinal_2,2) = 0;
+%     
+%     corners = [ corners; 
+%                 convHul(i_MaxFinal_2,1),convHul(i_MaxFinal_2,2);...
+%                 convHul(i_MaxFinal_22,1),convHul(i_MaxFinal_22,2)];
+%     
+%     white = zeros(1,2);
+%     i_white =0;
+%     avg_white = 0;
+%     for i=1:length(corners)
+%         scatter(corners(i,1),corners(i,2),'d','LineWidth',20);
+%         
+%         offset=-2:2;
+%         y = corners(i,2)+offset;
+%         x = corners(i,1)+offset;
+%         y1 = corners(i,2)-offset;
+%         x1 = corners(i,1)+offset;
+%         y2 = corners(i,2)+offset;
+%         x2 = corners(i,1)-offset;
+%         
+% %         avgPix_R = mean([img(y,x,1)+img(y1,x1,1)+img(y2,x2,1)]./3);
+% %         avgPix_G = mean([img(y,x,2)+img(y1,x1,2)+img(y2,x2,2)]./3);
+% %         avgPix_B = mean([img(y,x,3)+img(y1,x1,3)+img(y2,x2,3)]./3);
+%         avgPix_R = mean(img(y,x,1));
+%         avgPix_G = mean(img(y,x,2));
+%         avgPix_B = mean(img(y,x,3));
+% %         avgPix_R = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+% %             rect(i).Position(1):rect(i).Position(1)+5,1));
+% %         avgPix_G = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+% %             rect(i).Position(1):rect(i).Position(1)+5,2));
+% %         avgPix_B = mean(img(rect(i).Position(2):rect(i).Position(2)+5,...
+% %             rect(i).Position(1):rect(i).Position(1)+5,3));
+%         
+%         R = mean(avgPix_R);
+%         G = mean(avgPix_G);
+%         B = mean(avgPix_B);
+% 
+%         R_minus_B = mean(abs(avgPix_R - avgPix_B));
+%         R_minus_G = mean(abs(avgPix_R - avgPix_G));
+%         G_minus_B = mean(abs(avgPix_B - avgPix_G));
+% 
+%         avg_pixel = mean(avgPix_R + avgPix_G + avgPix_B)/3;
+%         diff_pix = (R_minus_B + G_minus_B  + R_minus_G )/3;
+%         
+%         [R, G, B];
+%         [R_minus_B, R_minus_G, G_minus_B];
+%         [avg_pixel, diff_pix];
+%         %avgs and differences gathered from experimental values
+%         %white first (largest values)
+%         %oneDiff_is_zero = ~(R_minus_B || R_minus_G || G_minus_B);
+%         max_diff = max([R_minus_B, R_minus_G, G_minus_B]);
+%         min_diff = min([R_minus_B, R_minus_G, G_minus_B]);
+%         
+%         
+%         maxRGB = max([R G B]);
+%         minRGB = min([R G B]);
+%         
+%         diff_betwMaxAdnMinDiff = maxRGB - minRGB;
+%         %diff_betwMaxAdnMinDiff = max_diff  - min_diff;
+%         
+%         % finds white
+%         if avg_pixel > 125 && diff_pix < 60
+%             if R_minus_B < 12 || R_minus_G  < 12 ...
+%                 || G_minus_B  < 12                
+%                 if ~isempty(white) && avg_white > 190
+%                     white = white;
+%                 else
+%                     if diff_betwMaxAdnMinDiff < 20
+%                         avg_white = avg_pixel;
+%                         white = corners(i,:);
+%                         i_white = i;
+%                     end
+%                 end
+%             end
+%             if R > 200 && B > 200 && G > 200
+%                 if ~isempty(white) && avg_white > 200
+%                     white = white;
+%                 else
+%                     if  diff_betwMaxAdnMinDiff < 50
+%                         avg_white = avg_pixel;
+%                         white = corners(i,:);
+%                         i_white = i;
+%                     end
+%                 end
+%             end
+%         end
+%     end
+%     % calculate distance from white
+%     %distance1 = vecnorm(corners(i+3,:) - corners(i,:),2,2);
+%     if i_white %if white was found
+%         dist_whiteFromOthers = zeros(4,1);
+%         for i=1:4
+%             dist_whiteFromOthers(i) = vecnorm(corners(i_white,:) - corners(i,:),2,2);
+%         end
+% 
+% 
+%         [~,indexDistMax] = max(dist_whiteFromOthers);
+%         bluishGreen = corners(indexDistMax,:);
+%         dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+% 
+%         [~,indexDistMax] = max(dist_whiteFromOthers);
+%         black = corners(indexDistMax,:);
+%         dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner
+% 
+%         [~,indexDistMax] = max(dist_whiteFromOthers);
+%         brown = corners(indexDistMax,:);
+%         dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner       
+% 
+%         cornersFound = [bluishGreen; %(1,:)
+%                         black; %(2,:)
+%                         brown; %(3,:)
+%                         white]; %(4,:)
+%     else
+%         cornersFound = 0;
+%     end
+%     y_diff = white(2)-black(2);
+%     x_diff = white(1)-black(1);
+%     
+%     rad2deg(atan2(y_diff, x_diff))
+% end
+
 function colorPos = findAllColors(cornersFound)
-%     %% TRANSFORMATION (shear + rotation + scaling )
+%     % TRANSFORMATION (shear + rotation + scaling )
 %     %x(1), y(1) bluish green
 %     %x(2), y(2) black
 %     %x(3), y(3) brown
@@ -759,7 +887,7 @@ function colorPos = findAllColors(cornersFound)
     end
     %step size between the large sides
     step_btw_wideSide = (blgr_to_brw - bk_to_wh)/3;
-    %% matrix that holds positions for all colors
+    % matrix that holds positions for all colors
     colors = {'ob','xw','xm','og'};
     % color_pos(:,:,1) == bluish green to brown ("dark skin") (1st row)
     % color_pos(:,:,2) == orange yellow to orange(2nd row)

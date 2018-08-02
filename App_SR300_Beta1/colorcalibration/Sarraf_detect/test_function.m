@@ -19,9 +19,9 @@ j = 0;
 
 for img_i=1:size(img_names,1)
     %[colorPos, checker_found, error] = ColorPatchDetectClean(deblank(img2(img_i,:)));
-
-    checker = imread(deblank(img2(img_i,:)));
-    calib_img = colorCalib(checker);
+    I_name = deblank(img2(img_i,:));
+    checker = imread(I_name);
+    colorCalib(checker, I_name, 1);
     
 %     if ~isempty(error) && checker_found %only records the error if checker was found
 %         failed_imgs(j+1,:) = img_names(img_i,:);
