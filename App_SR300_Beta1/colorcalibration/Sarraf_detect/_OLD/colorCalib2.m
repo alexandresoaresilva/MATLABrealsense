@@ -1,7 +1,279 @@
+% arguments (minimum 1): I, check_from_cam, 
+%       1. I : image to be calibrated ; if the only argument, it's assumed
+%               it's a Macbeth color checker
+%       2. check_from_cam : Macbeth color checkerboard picture, taken under 
+%                   the same conditions as the image to be calibrated.
+%                   if only two arguments, this will be calibrated without
+%                   normalization
+%       3. 'normalized' : if present, RGB vectors are divided by their sum
+%       in both the samples and in the reference values
+
+% %IMG_FOR_CORRECTION_FILENAME = getname(ref_checker);
+% %from https://www.mathworks.com/matlabcentral/answers/263718-what-is-the-best-way-to-get-the-name-of-a-variable-in-a-script
+
+%RETURNS
+function [calib_img, M] = colorCalib(varargin)
+    % if length(varargin) 1: I = checker & check_from_cam is calibrated
+    %                           NOT normalized
+    %
+    %                     2: if varargin{2} == 'normalized' ==>
+    %                           I = checker AND checker is calibrated AND
+    %                           normalized
+    %                                       OR
+    %                           I = img to be calibrated AND
+    %                           I is NOT check_from_cam
+    %
+    %                     3: I = img to be calibrated AND
+    %                           I is NOT check_from_cam 
+    %                           if varargin{3} == 'normalized' ==>
+    %                           I is normalized
+    % storing variables for use within the function
+    I = 0; 
+    norm = 0;
+    check_from_cam = 0;
+    
+    switch(length(varargin))
+        case 1
+            I = varargin{1}; %it's the checkers; it's going to be calibrated
+            check_from_cam = I; %self-explanatory
+        case 2
+            if strcmpl(varargin{2},'normalized')
+                I = varargin{1}; %it's the checkers; it's going to be calibrated
+                norm  = 1; % RGB vectors are normalized
+                check_from_cam = I; %self-explanatory
+            else
+                check_from_cam = double(varargin{1}); %self-explanatory
+                I = varargin{2}; % it's another pic, and the checker is used 
+                %as an light reference
+            end
+        case 3
+            if strcmpl(varargin{3},'normalized')
+                I = varargin{2}; % it's the checkers; it's going to be calibrated
+                norm  = 1; % RGB vectors are normalized
+                check_from_cam = I; %self-explanatory
+            end
+    end
+    
+    [colorPos, error] = ColorPatchDetectClean(check_from_cam);
+    I = double(I);
+    check_from_cam = double(check_from_cam);
+    
+    %% each begining of a 6-patch line on the checker is represented 
+    % in the comments of RGB_ref as  ----------- 
+    %RGB_ref RGBREF
+    RGBREF =  [115     82     68; %(1,:)dark skin (brown) ----------- 
+                194    150    130; %    light skin
+                 98    122    157; %    blue sky
+                 87    108     67; %    foliage
+                133    128    177; %    blue flower
+                103    189    170; %(6,:)bluish green
+                214    126     44; %(7,:)organge -----------
+                 80     91    166;
+                193     90     99;
+                 94     60    108;
+                157    188     64; 
+                224    163     46; %(12,:)orange yellow
+                 56     61    150; %(13,:)blue -----------
+                 70    148     73;
+                175     54     60;
+                231    199     31;
+                187     86    149; 
+                  8    133    161; %(18,:)cyan
+                243    243    242; %%(19,:)white-----------
+                200    200    200;
+                160    160    160;
+                122    122    121;
+                 85     85     85; 
+                 52     52     52];%(24,:)black    
+%% code co
+
+        %load('RGBreference.mat');
+        %sample colors from pic
+    RGB = zeros(24, 3);
+
+%         [colorPos, error] = ColorPatchDetectClean(img_char);
+%         calibratedImg = colorCalibrate(colorPos, rgb1, 1, '', 1);
+
+%% ============ building checkerboard values read from camera
+    %margin = sides_for_mean_pix_intensity;
+    
+    %color_pos
+    % colorPos matches sequence on pdf document
+    % colorPos(1:6,:) == brown ("dark skin") to bluish green (1st row)
+    % color_pos(7:12,:) == orange to orange yellow(2nd row)
+    % color_pos(13:18,:) == blue to cyan(3rd row)
+    % color_pos(19:24,:) == white to black (3rd row)
+    
+    for i = 1:length(colorPos) % image(pixel_vertical,pixel_horizontal,[R G B])
+        offset=-2:2;
+        x = colorPos(i,2)+offset;
+        y = colorPos(i,1)+offset;
+        
+       %rectangle for average of colors
+%        rect = rectangle('Position',[colorPos(i,2) colorPos(i,1) 10 10],...
+%            'Curvature',[1 1],'LineWidth',5);
+%        avgPix(1,:) = mean(mean(check_from_cam(...
+%            rect.Position(2):rect.Position(2)+5, ...
+%            rect.Position(1):rect.Position(1)+5,:)))
+        avgPix(1,:) = mean(mean(check_from_cam(y,x,:)))
+        RGB(i, :) = avgPix(1,:);
+    end
+
+    %load('RGBtopcam2.mat');
+    
+
+    %% ============ getting calibration matrix
+    %norms
+    %calcos = calibratecolor(RGBREF, RGB);
+
+    %% ============ getting corrected image
+
+%     errorig = sum(abs(RGBREF(:) - RGB(:))) / (3 * 24);
+%     errcor = sum(abs(RGBREF(:) - RGBCOR(:))) / (3 * 24);
+%     fprintf('Percent error in original: %d\n', errorig);
+%     fprintf('Percent error in correction: %d\n', errcor);
+
+    %% <<<<<<<<<<<<<<<<<<<<<<<< 2nd method >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    % =================================================================
+    % =================================================================
+
+    % getting normalized (UNIT VECTORS) column vectors of RGB value
+    % (mapping them to the unit sphere)
+    % in Bastin et all, RGB == RGB and XYZ == RGB_reg 
+    P_RGB_norm = zeros(24,3);
+    Q_RGB_ref_norm = zeros(24,3);
+
+    P_RGB_norm = RGB;
+    Q_RGB_ref_norm = RGBREF;
+    %mean_sqr_error_refer = immse(P_RGB_norm,Q_RGB_ref_norm )
+%     Err_before_cal = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm(:))) / (3 * 24)
+%     MSE_err_before_cal = immse(Q_RGB_ref_norm, P_RGB_norm)
+%     
+%     %LS_error_before_cal = lscov(P_RGB_norm,Q_RGB_ref_norm)
+%     [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm,Q_RGB_ref_norm)
+    
+    if norm %if normalized 
+        for i = 1:24 % image(pixel_vertical,pixel_horizontal,[R G B])
+            %P_RGB_norm(i,:) = RGB(i,:)./( sqrt( sum(RGB(i,:).^2) ) ); %taking the norm of the vectors
+            P_RGB_norm(i,:) = RGB(i,:)./sum(RGB(i,:)); %taking the norm of the vectors
+            %P_RGB_norm(i,:) = RGB(i,:); %taking the norm of the vectors
+        end
+
+        for i=1:length(RGBREF)
+            %Q_RGB_ref_norm(i,:) = RGBREF(i,:)./(sqrt(sum(RGBREF(i,:).^2)));
+            Q_RGB_ref_norm(i,:) = RGBREF(i,:)./sum(RGBREF(i,:));
+        end
+    end
+
+    %% transpose to follow logic 3x24 (24 column vectors representing colors, 3
+    % channels (one per row)
+    %P = P_RGB_norm';
+    %[M, M_scaled, transVect1, transformMAtrix2]   = calibratecolor3(P_RGB_norm, Q_RGB_ref_norm);
+    % M: matrix that minimizes the least squares calculation (3x3)
+    % M: calculated with inverse penrose; 
+    % M_scaled: all elements divided by sum(M(2,:)), 
+    % in Bastani and Funti (2014)
+    % result is 3x3 matrix (equivalent to Px = Q)
+    %transformation_Matrix_0 is a 3x1 vect, M calculated from invers
+    %transformation_Matrix_2 is a 3x1 vect, with M scaled 
+   %
+    %M =  Q*P'*(inv(P*P'));
+    
+    M = P_RGB_norm\Q_RGB_ref_norm;
+    %% ============ getting corrected image 2nd version
+
+    imagecorrected2 = calibration_routine(M, I); 
+    %check_from_cam = uint8(check_from_cam);
+    
+    height = size(check_from_cam, 1);
+    width = size(check_from_cam, 2);
+    imagecorrected2 = uint8(reshape(imagecorrected2(:), height, width, 3));
+    calib_img = imagecorrected2;
+    %% ============ calculating error 2nd version
+
+%     errormatrix = abs(RGBREF - RGB);
+%     figure(1)
+%     barcolorm = [1 0 0; 0 1 0; 0 0 1];
+%     b = bar(errormatrix,'FaceColor','flat');
+%     index = 1; 
+%     Error_after_calibration = sum(abs(Q_RGB_ref_norm(:) - P_RGB_norm_calibrated(:))) / (3 * 24);
+%     MSE_calibration_norm_when_norm = immse(P_RGB_norm_calibrated, P_RGB_norm);
+%     
+%     [M_lscov, std_errors, mean_Squared_error] = lscov(P_RGB_norm_calibrated,Q_RGB_ref_norm);
+    %% ============ save and display setup
+    % X corrected with M not scaled
+    
+    normalized = 'not normalized';
+    if norm
+        normalized = 'normalized';
+    end
+    hold off
+    
+    I_diff = imshowpair(I,imagecorrected2);
+    I_diff.Visible = 'off';
+    %figure('Name','color_calib');
+    imshow([I,imagecorrected2,I_diff.CData])
+    a = gcf;
+    title('original    ---   calibrated    ---   difference between the two');
+    xlabel(['color calibration (',normalized,')']);
+    pause
+    close(a);
+    hold on
+end
+
+% function calcos = calibratecolor(RGBREF, RGB) 
+%     %RGB are arrays of integers 0-255 24 elements long, calcos is 10x3 matrix 
+%     vals = [ones(24, 1), RGB, RGB.^2];
+%     calcosR = regress(RGBREF(:, 1), vals);
+%     calcosG = regress(RGBREF(:, 2), vals);
+%     calcosB = regress(RGBREF(:, 3), vals);
+%     calcos = [calcosR, calcosG, calcosB];
+% end
+
+% M 
+% function [M, M_scaled, transformMAtrix1, transformMAtrix2]  = calibratecolor3(P,Q)
+%     % M: matrix that minimizes the least squares calculation (3x3)
+%     % M: calculated with inverse penrose; 
+%     % M_scaled: all elements divided by sum(M(2,:)), 
+%     % in Bastani and Funti (2014)
+%     % result is 3x3 matrix (equivalent to Px = Q)
+%     %transformation_Matrix_0 is a 3x1 vect, M calculated from invers
+%     %transformation_Matrix_2 is a 3x1 vect, with M scaled 
+%    %
+%     %M =  Q*P'*(inv(P*P'));
+%     
+%     M = P\Q;
+% end
+function RGBCOR = calibration_routine(transfMatrix, image) 
+%function RGBCOR = correctcolor3(transfMatrix, image) 
+    %RGB are arrays of integers 0-255 X elements long, calcos is a 10x3 matrix 
+    image = reshape(image(:), [], 3);
+    %n = size(RGB, 1);
+    RGBCOR = image*transfMatrix;
+    R = RGBCOR(:,1);
+    G = RGBCOR(:,2);
+    B = RGBCOR(:,3);
+    
+      
+     minR = min(R);
+     maxR = max(R);
+     R = (R - minR) ./ (maxR - minR) .* 255;
+     
+     minG = min(G);
+     maxG = max(G);
+     G = (G - minG) ./ (maxG - minG) .* 255;
+     
+     minB = min(B);
+     maxB = max(B);
+     B = (B - minB) ./ (maxB - minB) .* 255;
+
+    RGBCOR = [R, G, B];
+end
+
 % Author: Dr. Hamed Sari-Sarraf
 % input:
 % outputs: 
-function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
+function [colorPos, error] = ColorPatchDetectClean(rgb1)
     addpath(pwd);
     
     error = MException.empty();
@@ -17,10 +289,13 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
         % clear('cam')
         % I1=rgb2hsv(rgb1);
         % I1=I1(:,:,3);
-        disp(img_char);
-        rgb1=imread(img_char);
+%         disp(img_char);
+%         rgb1=imread(img_char);
        % rgb1 = flip(rgb1)
-        
+
+        getname = @(x) inputname(1);
+        img_char = getname(rgb1);
+
         
         if size(rgb1,1)/size(rgb1,2) > .68...
            && size(rgb1,1)/size(rgb1,2) < .8
@@ -279,7 +554,6 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
             scatter(colorPos(6,2), colorPos(6,1),'LineWidth',15);
             %pause
 
-
             scatter(colorPos(7:12,2), colorPos(7:12,1),'LineWidth',15);
             % orange yellow
             scatter(colorPos(12,2), colorPos(12,1),'LineWidth',15);
@@ -297,22 +571,17 @@ function [colorPos, checker_found, error] = ColorPatchDetectClean(img_char)
             disp('failed to detect');
             return
         end
-
         
         hold off
         pause
-        colorCalibrate(colorPos, rgb1, ...
-            1, '', 1);
-        checker_found = 1;
-        
-        
     catch ME
-       error =  ME
+       error =  ME;
     end
         
 end
-%reorganizes locations to follow this pattern
-% brown to bluish green
+
+% Written by Alexandre Soares da Silva
+% reorganizes locations to follow % brown to bluish green
 % 
 function cornersFound = findCorners(img, locations, pixelList)
     %corners are
@@ -348,7 +617,7 @@ function cornersFound = findCorners(img, locations, pixelList)
     %   when the first max is eliminated, then points with max distance
     %   are sored
     
-    %1st run
+    %1st run - eliminates repetition fromm the 1s-2nd and 2nd-1st corners
     %i_MaxFinal serves as index to normHul, 1st point (i_th point)
     [ maxfinal_1, i_MaxFina_l] = max(max_norm_colected(:,2));
     %i_MaxFinal2 serves as index to normHul, 2nd point
@@ -361,18 +630,21 @@ function cornersFound = findCorners(img, locations, pixelList)
     [ maxfinal_1, i_MaxFina_l] = max(max_norm_colected(:,2));
     %i_MaxFinal2 serves as index to normHul, 2nd point
     i_MaxFinal_12 = max_norm_colected(i_MaxFina_l,1);
+    
     %get corner coordinates
     corners = [ convHul(i_MaxFina_l,1), convHul(i_MaxFina_l,2);...
                 convHul(i_MaxFinal_12,1), convHul(i_MaxFinal_12,2)];
     % repeat operation, now without the previous max
     max_norm_colected(i_MaxFina_l,2) = 0;
     
+%3rd run - eliminates repetition fromm the 3rds-4th and 4th-3rd corners
     %1st run on points 3,4
     [ ~, i_MaxFinal_2] = max(max_norm_colected(:,2));
     %i_MaxFinal2 serves as index to normHul, 2nd point
     i_MaxFinal_22 = max_norm_colected(i_MaxFinal_2,1);
     max_norm_colected(i_MaxFinal_2,2) = 0;
     
+%4th run
     %2nd run on points 3,4 (storage)
     [ ~, i_MaxFinal_2] = max(max_norm_colected(:,2));
     %i_MaxFinal2 serves as index to normHul, 2nd point
@@ -383,16 +655,12 @@ function cornersFound = findCorners(img, locations, pixelList)
     corners = [ corners; 
                 convHul(i_MaxFinal_2,1),convHul(i_MaxFinal_2,2);...
                 convHul(i_MaxFinal_22,1),convHul(i_MaxFinal_22,2)];
-
-    
     
     white = zeros(1,2);
     i_white =0;
     avg_white = 0;
     for i=1:length(corners)
         scatter(corners(i,1),corners(i,2),'d','LineWidth',20);
-%         rect(i) = rectangle('Position',[corners(i,:)-5 5 5],...
-%             'Curvature',[1 1],'LineWidth',5);
         
         offset=-2:2;
         y = corners(i,2)+offset;
@@ -426,9 +694,9 @@ function cornersFound = findCorners(img, locations, pixelList)
         avg_pixel = mean(avgPix_R + avgPix_G + avgPix_B)/3;
         diff_pix = (R_minus_B + G_minus_B  + R_minus_G )/3;
         
-        [R, G, B]
-        [R_minus_B, R_minus_G, G_minus_B]
-        [avg_pixel, diff_pix]
+        [R, G, B];
+        [R_minus_B, R_minus_G, G_minus_B];
+        [avg_pixel, diff_pix];
         %avgs and differences gathered from experimental values
         %white first (largest values)
         %oneDiff_is_zero = ~(R_minus_B || R_minus_G || G_minus_B);
@@ -491,13 +759,17 @@ function cornersFound = findCorners(img, locations, pixelList)
         brown = corners(indexDistMax,:);
         dist_whiteFromOthers(indexDistMax) = 0; %eliminates the opposing corner       
 
-        cornersFound = [bluishGreen;
-                        black;
-                        brown;
-                        white];
+        cornersFound = [bluishGreen; %(1,:)
+                        black; %(2,:)
+                        brown; %(3,:)
+                        white]; %(4,:)
     else
         cornersFound = 0;
     end
+    y_diff = white(2)-black(2);
+    x_diff = white(1)-black(1);
+    
+    rad2deg(atan2(y_diff, x_diff))
 end
 
 function colorPos = findAllColors(cornersFound)
@@ -520,14 +792,13 @@ function colorPos = findAllColors(cornersFound)
 %     [x(2), y(2)] =  cornersFound(2,:);
 %     [x(3), y(3)] =  cornersFound(3,:);
 %     [x(4), y(4)] =  cornersFound(4,:);
-
-
     step_blgr_to_brwn = ([x(1), y(1)] - [x(3), y(3)])/5;
     %black to white
     step_bk_to_wh = ([x(2), y(2)] - [x(4), y(4)])/5;
 
     blgr_to_brw(1,:) = [x(1), y(1)];
     bk_to_wh(1,:) = [x(2), y(2)];
+    
     for i=2:6 %for sides
        %bluish green to brown
        blgr_to_brw(i,:) = blgr_to_brw(i-1,:)- step_blgr_to_brwn;

@@ -8,9 +8,6 @@
 %
 %
 
-
-
-
 function calibratedImg = colorCalibrate(colorPos, refer_color_checker, ...
     bool_calib_checker_itself, img_for_corretion, normalize )
 clc
@@ -53,7 +50,6 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
      
      I = 0;
     
-    
     if ischar(refer_color_checker)
         refer_color_checker = deblank(refer_color_checker);
         COLOR_CHECKER_IMG_NAME = refer_color_checker;
@@ -77,12 +73,7 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
 %% img load
     % by default, calibrates the color checker image
     
-    
-   %IMG_FOR_CORRECTION_FILENAME = getname(ref_checker);
-   %from https://www.mathworks.com/matlabcentral/answers/263718-what-is-the-best-way-to-get-the-name-of-a-variable-in-a-script
-    getname = @(x) inputname(1);
-    IMG_FOR_CORRECTION_FILENAME = getname(refer_color_checker);
-    
+        
     I_to_correct = check_from_cam;
     
     if ~bool_calib_checker_itself
@@ -113,32 +104,18 @@ RGB_ref =  [115     82     68; %(1,:)dark skin (brown) -----------
     % color_pos(19:24,:) == white to black (3rd row)
         
     for i = 1:24 % image(pixel_vertical,pixel_horizontal,[R G B])
+        offset=-2:2;
+        y = corners(i,2)+offset;
+        x = corners(i,1)+offset;
         
        %rectangle for average of colors
-       rect = rectangle('Position',[colorPos(i,2) colorPos(i,1) 10 10],'Curvature',[1 1],'LineWidth',5);
-       
-       %rect = rectangle('Position',[colorPos(i,:)-5 10 10],'Curvature',[1 1],'LineWidth',5);
-
-%        avgPix(1,:) = mean(mean(checkImgCam(...
-%            colorPos(i,1):colorPos(i,1)+5, ...
-%            colorPos(i,2):colorPos(i,2)+5,:)))
-
-       
-       
-       avgPix(1,:) = mean(mean(check_from_cam(...
-           rect.Position(2):rect.Position(2)+5, ...
-           rect.Position(1):rect.Position(1)+5,:)))
-        
+%        rect = rectangle('Position',[colorPos(i,2) colorPos(i,1) 10 10],...
+%            'Curvature',[1 1],'LineWidth',5);
+%        avgPix(1,:) = mean(mean(check_from_cam(...
+%            rect.Position(2):rect.Position(2)+5, ...
+%            rect.Position(1):rect.Position(1)+5,:)))
+        avgPix(1,:) = mean(mean(check_from_cam(y,x,:)))
         RGB(i, :) = avgPix(1,:);
-        
-%         RGB(i, :) = floor(mean([...
-%             checkerboard_img_cam(macbeth_checker_positions(i, 1), macbeth_checker_positions(i, 2), :);... %1st row
-%             checkerboard_img_cam(macbeth_checker_positions(i, 1) + margin, macbeth_checker_positions(i, 2), :); ...
-%             checkerboard_img_cam(macbeth_checker_positions(i, 1), macbeth_checker_positions(i, 2) + margin, :); ...
-%             checkerboard_img_cam(macbeth_checker_positions(i, 1) - margin, macbeth_checker_positions(i, 2), :); ...
-%             checkerboard_img_cam(macbeth_checker_positions(i, 1), macbeth_checker_positions(i, 2) - margin, :)...
-%             ], 1)...
-%             );
     end
 
     %load('RGBtopcam2.mat');
