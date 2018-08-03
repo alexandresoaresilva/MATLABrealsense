@@ -1,18 +1,19 @@
 clear, clc;
 %target_folder = 'checker_imgs\colorCalTrouble';
 
-target_folder = 'checker_imgs\colorCalTrouble';
-addpath(target_folder);
+target_folder = 'checker_imgs';
+%target_folder = 'checker_imgs\white_trouble'
+%addpath(target_folder);
 
 [img_names, img2]  = save_file_names_in_folder(target_folder,'png');
-%img_names = "check48.png";
+% img_names = "check47.png";
 
 img2 = deblank(char(img_names));
 %stores names of files with errors from try and catch, which were
 failed_imgs = "";
 failure = MException.empty(); %initializing exception array
 % img_names = "check25.png";
- %img2 = char(img_names);
+% img2 = char(img_names);
  
 colorPos = zeros(24,3);
 j = 0;
