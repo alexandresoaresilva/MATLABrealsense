@@ -18,8 +18,6 @@ function stream_RGB(app, x, y)
         imagesc(app.axcolor{app.selectdev}, color_image);
         RGB_title = app.TabCamSelected(app.selectdev).Title;
         title(['RGB stream ', RGB_title]);
-        rectangle(app.axcolor{app.selectdev}, 'Position', [106, 80, 427, 320], 'EdgeColor', 'r', 'LineWidth', 3);
-        viscircles(app.axcolor{app.selectdev}, fliplr(app.colorcoords.colorcoords),  ones(24, 1) .* 10);
         axis(app.axcolor{app.selectdev}, 'image');
         drawnow;
 
