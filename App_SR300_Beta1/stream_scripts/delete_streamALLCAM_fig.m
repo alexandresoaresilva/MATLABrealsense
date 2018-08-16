@@ -1,4 +1,4 @@
-function delete_all_cams_fig(app, event)
+function delete_streamALLCAM_fig(app, event)
     if isvalid(app)
         if isvalid(app.figall) && ~strcmp(app.timerall.Running,'off')
             stop(app.timerall);

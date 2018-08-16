@@ -1,4 +1,4 @@
-function depth(app, x, y)
+function stream_DEPTH(app, x, y)
     
     calllib('realsense', 'rs_wait_for_frames', app.dev{app.selectdev}, rs_error);
     rs_check_error(app.err);

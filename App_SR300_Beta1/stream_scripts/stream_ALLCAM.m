@@ -1,4 +1,4 @@
-function allcam(app, x, y)
+function stream_ALLCAM(app, x, y)
 
     if isvalid(app.figall)
         for i = 1:app.deviceCount

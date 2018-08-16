@@ -1,4 +1,4 @@
-function delete_PCL_fig(app, event)
+function delete_streamPCL_fig(app, event)
     if isvalid(app)
         if ~strcmp(app.timerpcl.Running,'off')
             stop(app.timerpcl);

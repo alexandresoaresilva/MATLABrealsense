@@ -1,4 +1,4 @@
-function INFRARED_stream(app, x, y)
+function stream_INFRARED(app, x, y)
     if isvalid(app.figIR)
         calllib('realsense', 'rs_wait_for_frames', app.dev{app.selectdev}, rs_error);
         rs_check_error(app.err);

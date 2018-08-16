@@ -1,4 +1,4 @@
-function RGB_stream(app, x, y)
+function stream_RGB(app, x, y)
 %try
     if isvalid(app.figcolor{app.selectdev})
         calllib('realsense', 'rs_wait_for_frames', app.dev{app.selectdev}, rs_error);
