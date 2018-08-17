@@ -44,16 +44,23 @@ function loadAllParameters(app)
                 optPrt, currentSelectOptions{i,4}, rs_error);
                 rs_check_error(app.err);
         end
+        
+        app.ivcampresetDropDown(1).Value = currentSelectOptions(1,5);
+        update_ivcamPresetLabels(app);
+        
+        
+        
         %GetOptions(app);
         
         %applies ivcam parameters
         
 %         ivcamPreset = currentSelectOptions(1,5:19);
-%         
-%         for i = 1:length(app.ivcamopts)
-%            [~, app.err] = calllib('realsense', 'rs_set_device_option', app.dev{app.selectdev}, app.ivcamopts(i), app.ivcamoptvals(i), rs_error);
-%            rs_check_error(app.err);
-%         end
+         
+ %        for i = 1:length(app.ivcamopts)
+  %          optPrt = currentSelectOptions(i,1)-1;
+   %         [~, app.err] = calllib('realsense', 'rs_set_device_option', app.dev{app.selectdev}, app.ivcamopts(i), app.ivcamoptvals(i), rs_error);
+    %        rs_check_error(app.err);
+     %    end
         
     end
     
