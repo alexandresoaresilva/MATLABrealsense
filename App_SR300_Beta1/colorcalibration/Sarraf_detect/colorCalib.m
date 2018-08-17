@@ -28,6 +28,8 @@ function [calib_img, M] = colorCalib(check_from_cam, img_name, norm)
         %figure('Name','color_calib');
         imshow([check_from_cam,calib_img,I_diff.CData])
         a = gcf;
+        a.Units = 'normalized';
+        a.Position = [0 0 1 1];
         title('original    ---   calibrated    ---   difference between the two');
         xlabel(['color calibration (',normalized,')']);
         pause

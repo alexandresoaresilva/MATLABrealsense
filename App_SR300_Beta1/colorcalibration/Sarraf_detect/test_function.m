@@ -3,7 +3,7 @@ clear, clc;
 
 target_folder = 'checker_imgs';
 %target_folder = 'checker_imgs\white_trouble'
-%addpath(target_folder);
+addpath(target_folder);
 
 [img_names, img2]  = save_file_names_in_folder(target_folder,'png');
 % img_names = "check47.png";
