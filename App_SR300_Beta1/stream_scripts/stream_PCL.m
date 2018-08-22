@@ -30,6 +30,7 @@ function stream_PCL(app, x, y)
         xlim(app.axpcl, [-0.3 0.3]); ylim(app.axpcl, [-0.2 0.2]); zlim(app.axpcl, [-2 2]);
         xlabel(app.axpcl, 'x'); ylabel(app.axpcl, 'y'); zlabel(app.axpcl, 'z');
         view(app.axpcl, [0,0,-1]);
+        title(app.axpcl, app.PCL_title);
         drawnow
         if get(get(groot,'CurrentFigure'),'CurrentCharacter') == 'c'
             pcwrite(pc, strcat('pcl', num2str(app.countpcl), '.ply'));

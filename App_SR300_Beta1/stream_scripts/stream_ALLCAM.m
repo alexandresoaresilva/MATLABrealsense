@@ -16,6 +16,9 @@ function stream_ALLCAM(app, x, y)
             color_image = rot90(color_image,-1);
             imagesc(app.axall{i}, color_image);
             axis(app.axall{i},'image');
+            RGB_title = app.TabCamSelected(app.selectdev).Title;
+            title(app.axall{i}, ['RGB stream ', RGB_title]);
+
             drawnow;
             %depth frame
             [depth_image, ~, app.err] = calllib('realsense', 'rs_get_frame_data', app.dev{i}, ...
@@ -27,6 +30,9 @@ function stream_ALLCAM(app, x, y)
             depth_image = double(depth_image);
             depth_image = rot90(depth_image,-1);
             image(app.axall{i + app.deviceCount}, depth_image/2^15*255);
+            Depth_title = app.TabCamSelected(app.selectdev).Title;
+            title(app.axall{i + app.deviceCount}, ['Depth stream ', Depth_title]);
+            
             %colormap hot;
             colormap gray;
             axis(app.axall{i + app.deviceCount},'image');

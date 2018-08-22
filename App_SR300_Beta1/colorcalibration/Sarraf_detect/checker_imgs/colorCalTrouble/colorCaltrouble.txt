@@ -1,3 +1,0 @@
-check8.png (sampling the wrong colors)
-check28.png (sampling the wrong colors)
-check31.png (some colors are wrong)

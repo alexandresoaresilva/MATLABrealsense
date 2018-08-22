@@ -1,0 +1,8 @@
+--CHANGES MADE--
+changed startup function, every realsense function, a callback function and a dropdown, and some properties
+in order to add compatibility for multiple cameras
+also changes to scripts
+--MORE CHANGES--
+changed scripts, buttons, functions and properties to allow multiple streams to be displayed at once
+added functionality and script to display all streams at once from all cameras in one figure
+changed stream buttons to toggle on and off figures

@@ -13,12 +13,14 @@ function stream_RGB(app, x, y)
         color_image = reshape(color_image, 3, app.width, app.height);
         color_image = permute(color_image, [2,3,1]);
         color_image = rot90(color_image,-1);
-
-        app.calimage = color_image;
+        
+        app.color_calibrate_img = color_image;
+        
         imagesc(app.axcolor{app.selectdev}, color_image);
-        RGB_title = app.TabCamSelected(app.selectdev).Title;
-        title(['RGB stream ', RGB_title]);
+
         axis(app.axcolor{app.selectdev}, 'image');
+        %RGB_title = app.TabCamSelected(app.selectdev).Title;
+        title(app.axcolor{app.selectdev}, app.RGB_title);
         drawnow;
 
         if get(get(groot,'CurrentFigure'),'CurrentCharacter') == 'c'
@@ -28,6 +30,3 @@ function stream_RGB(app, x, y)
         end
     end
 end
-%catch e
-%   error = throw(e);
-%end

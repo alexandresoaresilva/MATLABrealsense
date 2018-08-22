@@ -12,6 +12,11 @@ function stream_DEPTH(app, x, y)
     depth_image = double(depth_image);
     depth_image = rot90(depth_image,-1);
     image(app.axdepth, depth_image/2^15*255);
+    %Depth_title = app.TabCamSelected(app.selectdev).Title;
+    %title(app.axdepth, ['Depth stream ', Depth_title]);
+    
+    title(app.axdepth, app.DEPTH_title);
+
     colormap gray;
     axis(app.axdepth,'image');
     drawnow;

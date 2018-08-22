@@ -15,9 +15,12 @@ function stream_INFRARED(app, x, y)
 
         %app.calimage = IR_image;
         imagesc(app.axIR, IR_image);
-        IR_title = app.TabCamSelected(app.selectdev).Title;
-        title(['IR stream ', IR_title]);
+%         IR_title = app.TabCamSelected(app.selectdev).Title;
+%         title(app.axIR, ['IR stream ', IR_title]);
         axis(app.axIR, 'image');
+        title(app.axIR, app.IR_title);
+        
+        
         drawnow;
 
         if get(get(groot,'CurrentFigure'),'CurrentCharacter') == 'c'
