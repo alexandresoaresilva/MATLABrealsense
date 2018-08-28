@@ -3,6 +3,8 @@
 compatibility(tested): SR300
 platformt: MATLAB's appdesigner
 
+This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download it and double click MATLABRealsense.
+
 1. Connect the camera before running MATLAB; 
 2. run MATLAB as an adminstrator on Windows to use the app;
 
