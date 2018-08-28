@@ -9,7 +9,7 @@ stream timer scripts:  Ben Bryant;
 color calibration: Alexandre Soares, Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm);
 ivcam UI: Joel Reznick, Yousef Saed.
 
-This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download it and double click MATLABRealsense.mlapp.
+This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download the cloned repository it and double click the MATLABRealsense.mlapp.
 
 1. Connect the camera before running MATLAB; 
 2. run MATLAB as an adminstrator on Windows to use the app;
