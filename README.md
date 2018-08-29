@@ -1,11 +1,11 @@
 # MATLABrealsense
 3D camera(Intel SR300) paremeter setup app
 
-compatibility(tested): SR300
+**compatibility(tested):** SR300
 
-platformt: MATLAB's appdesigner
+**platformt:** MATLAB's appdesigner
 
-Authors: 
+**Authors: **
 
 UX/functionalities: Alexandre Soares, Robert Kirkman;
 
@@ -14,6 +14,7 @@ stream timer scripts:  Ben Bryant;
 color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm), Alexandre Soares;
 
 ivcam UI: Joel Reznick, Yousef Saed.
+
 
 This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download the cloned repository it and double click the MATLABRealsense.mlapp.
 
@@ -39,7 +40,8 @@ https://github.com/IntelRealSense/librealsense
 
 Contributions to the UI (ivcam panels) and load/save parameters:
 
-Repositories
+**Contributors' Repositories** 
+@moosef-yousef
 
 Yousef Saed: https://github.com/moosef-yousef/MATLABrealsense
 
