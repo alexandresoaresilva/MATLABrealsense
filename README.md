@@ -41,7 +41,8 @@ https://github.com/IntelRealSense/librealsense
 Contributions to the UI (ivcam panels) and load/save parameters:
 
 **Contributors' Repositories** 
-@moosef-yousef
+
+@github/moosef-yousef
 
 Yousef Saed: https://github.com/moosef-yousef/MATLABrealsense
 
