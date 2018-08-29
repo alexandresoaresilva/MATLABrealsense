@@ -5,7 +5,7 @@
 
 **platformt:** MATLAB's appdesigner
 
-**Authors: **
+**Authors:**
 
 UX/functionalities: Alexandre Soares, Robert Kirkman;
 
