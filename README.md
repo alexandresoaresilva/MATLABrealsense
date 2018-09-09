@@ -1,6 +1,8 @@
 # MATLABrealsense
 3D camera(Intel SR300) paremeter setup app
 
+color calibration: the capture with the camera doesn't have steps that follow it and make the RGB stream to crash. Lookign for a fix.
+
 **compatibility(tested):** SR300
 
 **platformt:** MATLAB's appdesigner
@@ -16,7 +18,7 @@ color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker 
 ivcam UI: Joel Reznick, Yousef Saed.
 
 **Description:**
-This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download the cloned repository it and double click the MATLABRealsense.mlapp.
+This app uses the previous (now deprecated) version of the Intel Realsense library. You don't need to install the SDK to use this app; just download the cloned repository it and double click the file MATLABRealsense.mlapp.
 
 1. Connect the camera before running MATLAB; 
 2. run MATLAB as an adminstrator on Windows to use the app;
