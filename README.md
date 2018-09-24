@@ -4,7 +4,7 @@
 ![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
 
 **color calibration: only the one based on opening a file works for now. After the checker image is loaded and shown, press enter. A calibrated version will be shown maximized. Press enter again to see the next options (the most useful one is the batch process folder).**
-
+***************************************************************************************************************************************
 **compatibility(tested):** SR300
 
 **platformt:** MATLAB's appdesigner
