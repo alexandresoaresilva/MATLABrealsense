@@ -1,8 +1,6 @@
 # MATLABrealsense
 3D camera(Intel SR300) paremeter setup app
 
-![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
-
 color calibration: the capture with the camera doesn't have steps that follow it and make the RGB stream to crash. Lookign for a fix.
 
 **compatibility(tested):** SR300
