@@ -472,11 +472,10 @@ function cornersFound = findCorners(img, locations, pixelList)
 
 
     img = img*1.01;
-%     b = convhull(locations(:,1),locations(:,2));
-%     convHul = [locations(b,1) locations(b,2)];
+
     norm_colected = zeros(length(locations),1);
 
-    % gets distances between components of the convex hull;
+    
     % guaranteed to return corners (they are an integral part of the
     % 4-sided polygon that represents the patches (mostly a rectangle, but
     % sometimes a rhombus
