@@ -1,6 +1,8 @@
 # MATLABrealsense
 3D camera(Intel SR300) paremeter setup app
 
+COLOR CALIBRATION WARNING: ONLY COMPATIBLE WITH MATLAB 2018b and beyond (uses axes passed to uifigure, feature not available until that version).
+
 ![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
 
 **color calibration: only the one based on opening a file works for now. After the checker image is loaded and shown, press enter. A calibrated version will be shown maximized. Press enter again to see the next options (the most useful one is the batch process folder).**
