@@ -4,7 +4,9 @@ function delete_streamRGB_fig(app, event)
             if ~strcmp(app.timercolor{app.selectdev}.Running,'off')
                 stop(app.timercolor{app.selectdev});
             end
-            delete(app.figcolor{app.selectdev});
+            if isvalid(app.figcolor{app.selectdev})
+                delete(app.figcolor{app.selectdev});
+            end
             app.deleting_RGB_stream = 1;
         end
     end
