@@ -5,7 +5,7 @@ COLOR CALIBRATION WARNING: ONLY COMPATIBLE WITH MATLAB 2018b and beyond (uses ax
 
 ![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
 
-**color calibration: only the one based on opening a file works for now. After the checker image is loaded and shown, press enter. A calibrated version will be shown maximized. Press enter again to see the next options (the most useful one is the batch process folder).**
+**color calibration: capture with camera still untested. Other options work normally.
 ***************************************************************************************************************************************
 **compatibility(tested):** SR300
 
@@ -40,11 +40,11 @@ Capabilities:
   
   -RGB, depth, infrared, and point cloud (color projection onto depth) streams
   
-  -color calibration with automatic detection of Macbeth color checker as target. It's based on Bastani and Funt's paper about normalized least-squares regression).
+  -color calibration with automatic detection of Macbeth color checker as target. It's based on Bastani and Funt's paper about normalized least-squares regression). You can save the transformation matrix for later use or use it to batch process a folder, among other things.
 
 Near future planned features:
   -point cloud capture
-  -color calibration from camera capture (still not implemented fully)
+  -color calibration from camera capture
 ps: It carries Intel 3d RealSense libraries, licensed under Apache's 2.0 software license:
 http://www.apache.org/licenses/LICENSE-2.0
 
