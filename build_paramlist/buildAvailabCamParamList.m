@@ -53,29 +53,6 @@ function buildAvailabCamParamList(app) %script for getting all parameters(app)
                     'rs_get_device_option_range_ex', app.dev{a}, option, ...
                      opt_min(i), opt_max(i), opt_step(i), opt_default(i),rs_error);
                 rs_check_error(app.err);
-                
-%                 paramCallName{j} = rsoptions{i};
-%                 parameterNicerName(j) = tokParamName(rsoptions(i));
-%                 paramOPTtabCount{j}= j;
-%                 supportedConnectedCam(j) = app.connctdShortCamNames(a);
-% 
-%                 [optsupported{j}, ~, app.err] = calllib('realsense', 'rs_device_supports_option',...
-%                     app.dev{a}, option, rs_error);
-%                 rs_check_error(app.err);
-% 
-%                 [dev_opt_desc{j}, ~, app.err] = calllib('realsense',...
-%                      'rs_get_device_option_description', app.dev{a}, option, rs_error);
-%                  rs_check_error(app.err);
-% 
-%                 [dev_opt_current(j), ~, app.err] = calllib('realsense',...
-%                     'rs_get_device_option', app.dev{a}, option, rs_error);
-%                 rs_check_error(app.err); %gets current value
-% 
-%                 [~,  opt_min(j), opt_max(j), opt_step(j), opt_default(j), app.err] = calllib('realsense',...
-%                     'rs_get_device_option_range_ex', app.dev{a}, option, ...
-%                      opt_min(i), opt_max(i), opt_step(i), opt_default(i),rs_error);
-%                 rs_check_error(app.err);
-%                 j = j + 1;
             end
         end
       %1. paramOPTtabCount = indexes from the full list of parameters.
@@ -110,7 +87,6 @@ function buildAvailabCamParamList(app) %script for getting all parameters(app)
          end
         %cams name to be struc field
         field = char(strcat(app.connctdShortCamNames{a},strcat('_',string(a)))); 
-
 
         [app.selCamOptTable(:).(field)] = deal(dummyOptTable); %saves
         
