@@ -30,17 +30,17 @@ This app uses the previous (now deprecated) version of the Intel Realsense libra
 
 Capabilities:
 
-  -set RGB parameters (brightness, contrast etc) settings
+  - set RGB parameters (brightness, contrast etc) settings
   
-  -set depth parameters through Ivcam presets
+  - set depth parameters through Ivcam presets
   
-  -saving the parameters set to a mat file
+  - saving the parameters set to a mat file
   
-  -loading saved parameters back to the camera (including ivcam depth parameters)
+  - loading saved parameters back to the camera (including ivcam depth parameters)
   
-  -RGB, depth, infrared, and point cloud (color projection onto depth) streams
+  - RGB, depth, infrared, and point cloud (color projection onto depth) streams
   
-  -color calibration with automatic detection of Macbeth color checker as target. It's based on Bastani and Funt's paper about normalized least-squares regression). You can save the transformation matrix for later use or use it to batch process a folder, among other things.
+  - color calibration with automatic detection of Macbeth color checker as target. It's based on Bastani and Funt's paper about normalized least-squares regression). You can save the transformation matrix for later use or use it to batch process a folder, among other things.
 
 Near future planned features:
   -point cloud capture
