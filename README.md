@@ -5,19 +5,19 @@ COLOR CALIBRATION WARNING: ONLY COMPATIBLE WITH MATLAB 2018b and beyond (uses ax
 
 ![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
 
-**color calibration: capture with camera still untested. Other options work normally.
+**color calibration:** capture with camera seems to be working correctly requires further testing. Other options work normally.
 ***************************************************************************************************************************************
 **compatibility(tested):** SR300
 
-**platformt:** MATLAB's appdesigner
+**platform:** MATLAB's appdesigner
 
 **authors:**
 
-UX/functionalities: Alexandre Soares, Robert Kirkman;
+UX/implementation: Alexandre Soares, Robert Kirkman;
 
-stream timer scripts:  Ben Bryant;
+stream scripts:  Ben Bryant;
 
-color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm), Alexandre Soares;
+color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm), Alexandre Soares (finding and sampling colors based on patches' detection; regression task and UX);
 
 ivcam UI: Joel Reznick, Yousef Saed.
 
