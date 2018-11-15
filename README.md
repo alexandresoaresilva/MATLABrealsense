@@ -48,6 +48,8 @@ Near future planned features:
 ps: It carries Intel 3d RealSense libraries, licensed under Apache's 2.0 software license:
 http://www.apache.org/licenses/LICENSE-2.0
 
+OSB: an error audio signal plays after a steam figure is closed. It's not high in my priorities list to investigate that (since Matlab does not show an error message together with the audio) but it'd be cool if somebody did it.
+
 The original C/C++ RealSense source files can be found here:
 https://github.com/IntelRealSense/librealsense
 
