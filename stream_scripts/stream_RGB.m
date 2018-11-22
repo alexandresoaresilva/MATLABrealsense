@@ -12,25 +12,13 @@ function stream_RGB(app, x, y)
 		color_image = reshape(color_image, 3, app.width, app.height);
 		color_image = permute(color_image, [2,3,1]);
 		color_image = rot90(color_image,-1);
-		
 		app.color_calibrate_img = color_image;
-		if ~app.deleting_RGB_stream 
-            imagesc(app.axcolor{app.selectdev}, color_image);
-        end
-
-		if ~app.deleting_RGB_stream 
-            axis(app.axcolor{app.selectdev}, 'image');
-        end
-
-		if ~app.deleting_RGB_stream 
-            title(app.axcolor{app.selectdev}, app.RGB_title);
-            
-        end
+        imagesc(app.axcolor{app.selectdev}, color_image);
+        axis(app.axcolor{app.selectdev}, 'image');
+        title(app.axcolor{app.selectdev}, app.RGB_title);
+        drawnow; 
         
-        if ~app.deleting_RGB_stream 
-            drawnow; 
-        end
-            %RGB_title = app.TabCamSelected(app.selectdev).Title;
+        %RGB_title = app.TabCamSelected(app.selectdev).Title;
             
 
         if get(get(groot,'CurrentFigure'),'CurrentCharacter') == 'c'
