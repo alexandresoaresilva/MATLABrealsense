@@ -25,7 +25,6 @@ function [calib_img, M, RGB_ref_values, err_pkg, err_calib_pkg]...
         
         %reference samples from manufacturer
         [M, RGB_ref_values] = getTransformMatrix(RGB_samples, norm);
-        
         %Error for difference between unmodified image
         % and reference values form manufacturer
         [RMS, abs_dist_per_channel, dist_from_ref, within_distance] =...
@@ -53,8 +52,7 @@ function [calib_img, M, RGB_ref_values, err_pkg, err_calib_pkg]...
         err_pkg = 0;
         err_calib_pkg = 0;
         M = 0;
-        xlabel('failed to detect. Please try with a different checker pic');
-        disp('Please try with a different checker pic');
+        disp('failed to detect. Please try with a different checker pic');
     end
 end
 

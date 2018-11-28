@@ -2,14 +2,8 @@
 close all;
 clear, clc;
 
-% a = calibGui;
-% transform_3x3_matrix = a.transform_3x3_matrix;
-
-% prompt = {'Enter the name of your image :','Enter colormap name:'};
-% title = 'Input';
-% dims = [1 35];
-% definput = {'20','hsv'};
-% answer = inputdlg(prompt,title,dims,definput)
+a = calibGui;
+transform_3x3_matrix = a.transform_3x3_matrix;
 
 % 
 %     dist_from_ref_f = @(ref,samples)sqrt(sum( (ref-samples).^2,2) ); 
