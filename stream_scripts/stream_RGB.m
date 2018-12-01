@@ -17,15 +17,11 @@ function stream_RGB(app, x, y)
         axis(app.axcolor{app.selectdev}, 'image');
         title(app.axcolor{app.selectdev}, app.RGB_title);
         drawnow; 
-        
-        %RGB_title = app.TabCamSelected(app.selectdev).Title;
-            
 
         if get(get(groot,'CurrentFigure'),'CurrentCharacter') == 'c'
             imwrite(color_image, strcat('color', num2str(app.countcolor), '.png'));
             set(gcf,'currentch','n');
             app.countcolor = app.countcolor + 1;
         end
-        
 	end
 end
