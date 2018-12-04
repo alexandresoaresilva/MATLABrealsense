@@ -13,11 +13,11 @@ COLOR CALIBRATION WARNING: ONLY COMPATIBLE WITH MATLAB 2018b and beyond (uses ax
 
 **authors:**
 
-UX/implementation: Alexandre Soares, Robert Kirkman;
+UX/implementation: Alexandre Silva, Robert Kirkman;
 
-stream scripts:  Ben Bryant;
+stream scripts:  Ben Bryant, Alexandre Silva
 
-color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm), Alexandre Soares (finding and sampling colors based on patches' detection; regression task and UX);
+color calibration: Dr. Hamed Sari-Sarraf (developed the automatic color checker detection algorithm), Alexandre Silva (finding and sampling colors based on patches' detection; regression task and UX);
 
 ivcam UI: Joel Reznick, Yousef Saed.
 
