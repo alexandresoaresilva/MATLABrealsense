@@ -5,7 +5,7 @@ COLOR CALIBRATION WARNING: ONLY COMPATIBLE WITH MATLAB 2018b and beyond (uses ax
 
 ![alt text](https://github.com/alexandresoaresilva/MATLABrealsense/blob/master/documentation/Capture.PNG)
 
-**color calibration:** capture with camera seems to be working correctly requires further testing. Other options work normally.
+**color calibration:** capture with camera seems to be working correctly but requires further testing. Other options work normally.
 ***************************************************************************************************************************************
 **compatibility(tested):** SR300
 
